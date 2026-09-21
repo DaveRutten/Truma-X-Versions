@@ -51,6 +51,11 @@ Verswater, grijswater en accuspanning.
 
 ![Status](screenshots/04-status.png)
 
+### Timers
+Schema's bekijken, aan/uit zetten en bewerken.
+
+![Timers](screenshots/05-timers.png)
+
 ### Instellingen
 Taal, eenheden, overzicht-tegels, apparatenlijst, gasfles-kalibratie, firmware-updates, beveiliging en meldingen — alles in één scherm.
 
