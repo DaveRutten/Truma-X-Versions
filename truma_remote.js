@@ -141,7 +141,7 @@ export const decodeJson = (b) => JSON.parse(dec.decode(b));
 // Remote allowlist (docs/remote-protocol.md section 5); anything else is answered 403
 // locally without a round trip.
 export const REMOTE_ALLOWED = new Set(["GET /api/state", "GET /api/settings", "GET /api/timers",
-  "GET /api/history", "GET /api/update", "POST /api/set", "POST /api/timers"]);
+  "GET /api/history", "GET /api/update", "GET /api/log", "POST /api/set", "POST /api/timers"]);
 export const STALE_S = 150;
 
 // events: onState(msg), onStatus({connected,url,error}), onMismatch(theirVersion)

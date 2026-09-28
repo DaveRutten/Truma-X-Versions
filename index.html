@@ -105,6 +105,38 @@
   .trxbar a{color:var(--accent);text-decoration:none;white-space:nowrap}
   .trxtoast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#e23b3b;color:#fff;
     padding:10px 16px;border-radius:12px;font-size:.84rem;z-index:30;box-shadow:0 6px 20px #0006;max-width:90vw;text-align:center}
+  .footupd{display:inline-flex;align-items:center;gap:10px;margin-top:10px;padding:8px 10px 8px 14px;border:1px solid #2bb67366;
+    background:#2bb67314;color:var(--fg);border-radius:999px;font-size:.8rem}
+  .footupd button{background:#2bb673;color:#0b1017;border:none;border-radius:999px;padding:6px 12px;font-weight:600;cursor:pointer;font-size:.78rem}
+  .footupd small{color:var(--muted)}
+  .flag{width:20px;height:14px;border-radius:3px;vertical-align:-2px;margin-right:8px;box-shadow:0 0 0 1px #0003}
+  .logbar{margin-bottom:12px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+  .logbar::-webkit-scrollbar{display:none}
+  .seg.logbar button{flex:none;min-width:0;padding:9px 14px;border-radius:999px}
+  #pg-more details.all>summary{display:none}
+  .settabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 -2px 16px;padding:0 2px 2px;-webkit-overflow-scrolling:touch}
+  .settabs::-webkit-scrollbar{display:none}
+  .settabs button{flex:none;padding:9px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--muted);font-size:.84rem;cursor:pointer;white-space:nowrap}
+  .settabs button[aria-selected="true"]{color:#0b1017;background:var(--accent);border-color:var(--accent);font-weight:600}
+  #settings .sec.tabhide{display:none !important}
+  .psearch{width:100%;background:var(--surface2);color:var(--fg);border:1px solid var(--line);border-radius:11px;padding:11px 12px;font-size:.9rem;margin-bottom:12px}
+  details.ptopic{border-top:1px solid var(--line)}
+  details.ptopic:first-of-type{border-top:none}
+  details.ptopic>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:8px;padding:12px 2px;font-size:.9rem;font-weight:600}
+  details.ptopic>summary::-webkit-details-marker{display:none}
+  details.ptopic>summary small{color:var(--muted);font-weight:500;font-size:.74rem}
+  details.ptopic>summary .chev{margin-left:auto;transition:.2s;color:var(--muted)}
+  details.ptopic[open]>summary .chev{transform:rotate(180deg)}
+  details.ptopic .psub{color:var(--muted);font-size:.68rem;letter-spacing:.05em;text-transform:uppercase;margin:6px 2px 0}
+  .prow .k code{display:block;color:var(--muted);font-size:.66rem;margin-top:3px;font-family:ui-monospace,Menlo,monospace;opacity:.8}
+  .logday{color:var(--muted);font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;margin:16px 2px 4px}
+  .logrow{display:flex;align-items:flex-start;gap:10px;padding:10px 2px;border-bottom:1px solid var(--line)}
+  .logrow:last-child{border-bottom:none}
+  .logrow .lt{width:42px;flex:none;color:var(--muted);font-size:.8rem;font-variant-numeric:tabular-nums;padding-top:1px}
+  .logrow .ld{width:8px;height:8px;border-radius:50%;flex:none;margin-top:6px;background:#9fb2d0}
+  .logrow .ld.cmd{background:var(--accent)}.logrow .ld.fault{background:#e23b3b}.logrow .ld.warn{background:#f0a022}.logrow .ld.measure{background:#57c98a}
+  .logrow .lx{flex:1;font-size:.86rem;line-height:1.4}
+  .logrow .lx small{display:block;color:var(--muted);font-size:.74rem;margin-top:2px}
   .rmqr{background:#fff;border-radius:12px;padding:10px;margin:10px auto;width:220px;height:220px}
   .rmqr img{width:100%;height:100%;display:block}
   .rmlink{width:100%;background:var(--surface2);color:var(--fg);border:1px solid var(--line);border-radius:9px;padding:10px;font-size:.78rem}
@@ -166,6 +198,27 @@
   #climateHistory{max-width:320px;margin:0 auto 8px}
   .trend{margin-top:6px}
   .taxis{display:flex;justify-content:space-between;gap:6px;color:var(--muted);font-size:.68rem;margin-top:5px}
+  /* ---- responsive: phone = as designed; tablet / PC get more columns ---- */
+  @media (min-width:720px){
+    body{padding-left:24px;padding-right:24px}
+    .wrap{max-width:780px}
+    .grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+    .tile{min-height:118px}
+    .page.split:not(.hidden){display:grid;grid-template-columns:minmax(300px,1fr) minmax(0,1.1fr);gap:0 28px;align-items:start}
+    .page.split .pmain{position:sticky;top:16px}
+    .page.split .pside{padding-top:18px}
+    #settings:not(.hidden){column-count:2;column-gap:18px}
+    #settings>.topbar,#settings>.settabs{column-span:all}
+    #settings>.sec{break-inside:avoid;display:inline-block;width:100%}
+    .trxbar{margin-top:-4px}
+  }
+  @media (min-width:1100px){
+    .wrap{max-width:1120px}
+    .grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+    .dial{width:320px;height:320px}
+    .temp{font-size:4.6rem}
+    #settings:not(.hidden){column-count:3}
+  }
 </style>
 </head>
 <body>
@@ -190,7 +243,8 @@
     <div id="pageTitle" class="pagetitle hidden"></div>
     <div id="home"></div>
 
-    <div class="page hidden" id="pg-climate">
+    <div class="page hidden split" id="pg-climate">
+    <div class="pcol pmain">
     <div class="dial" id="dial">
       <svg viewBox="0 0 240 240" aria-hidden="true">
         <circle class="track" cx="120" cy="120" r="100" transform="rotate(135 120 120)" stroke-dasharray="471 628"></circle>
@@ -208,6 +262,8 @@
       <button id="minus" aria-label="-">&minus;</button>
       <button id="plus" aria-label="+">+</button>
     </div>
+    </div>
+    <div class="pcol pside">
     <div class="modes" id="modes"></div>
     <div class="card hidden" id="climSrcCard" style="margin-top:14px">
       <div class="subrow" id="climSrcRow"><label id="climSrcLabel"></label><div class="seg" id="climSrcSeg"></div></div>
@@ -216,12 +272,14 @@
     </div>
     <div id="climateHistory"></div>
     </div>
+    </div>
 
     <div class="page hidden" id="pg-fan">
     <div class="card hidden" id="fanCard"><h3 id="fanTitle"></h3><div class="seg" id="fanSeg"></div></div>
     </div>
 
-    <div class="page hidden" id="pg-energy" style="--accent:#f0913b;--accent-soft:#f0913b22">
+    <div class="page hidden split" id="pg-energy" style="--accent:#f0913b;--accent-soft:#f0913b22">
+    <div class="pcol pmain">
     <div class="dial small hidden" id="wDial">
       <svg viewBox="0 0 240 240" aria-hidden="true">
         <circle class="track" cx="120" cy="120" r="100" transform="rotate(135 120 120)" stroke-dasharray="471 628"></circle>
@@ -234,11 +292,14 @@
         <div class="cur" id="wCur"></div>
       </div>
     </div>
+    </div>
+    <div class="pcol pside">
     <div class="card hidden" id="energyCard">
       <h3 id="energyTitle" class="hidden"></h3>
       <div class="subrow" id="srcRow"><label id="srcLabel"></label><div class="seg" id="srcSeg"></div></div>
       <div class="subrow hidden" id="elecRow"><label id="elecLabel"></label><div class="seg" id="elecSeg"></div></div>
       <div class="subrow" id="waterRow"><label id="waterLabel"></label><div class="seg" id="waterSeg"></div></div>
+    </div>
     </div>
     </div>
 
@@ -253,6 +314,12 @@
     <div class="page hidden" id="pg-status"><div class="card hidden" id="statusCard"><h3 id="statusTitle"></h3><div id="statusBody"></div></div></div>
     <div class="page hidden" id="pg-timers"><div class="card hidden" id="timersCard"><h3 id="timersTitle"></h3><div id="timersBody"></div></div></div>
 
+    <div class="page hidden" id="pg-log">
+      <div class="seg logbar" id="logSeg"></div>
+      <div class="card" id="logCard"><div id="logList"></div></div>
+      <button class="pill hidden" id="logMoreBtn" style="width:100%"></button>
+    </div>
+
     <div class="page hidden" id="pg-more">
     <details class="all" open>
       <summary id="moreLabel"><svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></summary>
@@ -260,7 +327,7 @@
     </details>
     </div>
 
-    <div class="foot"><span id="footnote"></span></div>
+    <div class="foot"><span id="footnote"></span><div id="footUpd" class="footupd hidden"></div></div>
   </div>
 
   <!-- ===== SETTINGS ===== -->
@@ -270,29 +337,30 @@
       <h1 class="settitle" id="setTitle"></h1>
       <span style="width:30px"></span>
     </div>
+    <div class="settabs" id="setTabs" role="tablist"></div>
 
-    <div class="sec"><h2 id="langHead"></h2><div class="pillwrap" id="langWrap"></div></div>
-    <div class="sec"><h2 id="unitHead"></h2><div class="pillwrap" id="unitWrap"></div></div>
-    <div class="sec" id="ovSec"><h2 id="ovHead"></h2>
+    <div data-tab="general" class="sec"><h2 id="langHead"></h2><div class="pillwrap" id="langWrap"></div></div>
+    <div data-tab="general" class="sec"><h2 id="unitHead"></h2><div class="pillwrap" id="unitWrap"></div></div>
+    <div data-tab="general" class="sec" id="ovSec"><h2 id="ovHead"></h2>
       <div class="card">
         <div class="subrow"><label id="statusTileLabel"></label><select id="statusMetricSel" style="background:var(--surface2);color:var(--fg);border:1px solid var(--line);border-radius:9px;padding:9px"></select></div>
         <div class="subrow"><label id="climTileLabel"></label><select id="climMetricSel" style="background:var(--surface2);color:var(--fg);border:1px solid var(--line);border-radius:9px;padding:9px"></select></div>
         <div class="subrow" style="margin:0"><label id="gasTileLabel"></label><select id="gasMetricSel" style="background:var(--surface2);color:var(--fg);border:1px solid var(--line);border-radius:9px;padding:9px"></select></div>
       </div>
     </div>
-    <div class="sec"><h2 id="devHead"></h2>
+    <div data-tab="devices" class="sec"><h2 id="devHead"></h2>
       <div class="card" style="margin-bottom:10px">
         <div class="subrow" style="margin:0"><label id="bleNameLabel" for="bleNameInput"></label><input type="text" id="bleNameInput" maxlength="32" placeholder="truma-x" style="width:100%;background:var(--surface2);color:var(--fg);border:1px solid var(--line);border-radius:9px;padding:10px"></div>
         <div id="bleNameHint" class="muted" style="font-size:.8rem;margin-top:6px"></div>
       </div>
       <div id="devList"></div></div>
-    <div class="sec hidden" id="displaySec"><h2 id="dispHead"></h2>
+    <div data-tab="general" class="sec hidden" id="displaySec"><h2 id="dispHead"></h2>
       <div class="card"><div class="subrow" style="margin:0"><label id="brightLabel"></label><input type="range" id="brightRange" min="10" max="100" value="80"></div></div>
     </div>
-    <div class="sec" id="scaleSec"><h2 id="scaleHead"></h2>
+    <div data-tab="devices" class="sec" id="scaleSec"><h2 id="scaleHead"></h2>
       <div class="card"><div id="scaleBody"></div></div>
     </div>
-    <div class="sec" id="fwSec"><h2 id="fwHead"></h2>
+    <div data-tab="system" class="sec" id="fwSec"><h2 id="fwHead"></h2>
       <div class="card">
         <div class="lightrow" style="margin-bottom:10px"><span id="verLabel"></span><span id="verVal" class="muted"></span></div>
         <div class="subrow"><label id="repoLabel"></label><input type="text" id="repoInput" placeholder="owner/truma-x" style="width:100%;background:var(--surface2);color:var(--fg);border:1px solid var(--line);border-radius:9px;padding:10px"></div>
@@ -307,7 +375,7 @@
         </details>
       </div>
     </div>
-    <div class="sec" id="rmSec"><h2 id="remoteHead"></h2>
+    <div data-tab="conn" class="sec" id="rmSec"><h2 id="remoteHead"></h2>
       <div class="card" id="rmLocalCard">
         <div class="lightrow"><span id="rmEnableLabel"></span><div class="toggle" id="rmToggle" role="switch" aria-pressed="false"></div></div>
         <div id="rmState" class="muted" style="font-size:.82rem;margin-top:8px;min-height:1em"></div>
@@ -329,7 +397,7 @@
       </div>
     </div>
 
-    <div class="sec" id="netSec"><h2 id="netHead"></h2>
+    <div data-tab="conn" class="sec" id="netSec"><h2 id="netHead"></h2>
       <div class="card">
         <div class="pillwrap" id="netModeWrap" style="margin-bottom:10px"></div>
         <div class="subrow" id="wifiRow"><label id="wifiSsidLabel"></label><input type="text" id="wifiSsidInput" style="width:100%;background:var(--surface2);color:var(--fg);border:1px solid var(--line);border-radius:9px;padding:10px"></div>
@@ -339,7 +407,7 @@
         <div id="netStatus" class="muted" style="font-size:.82rem;margin-top:10px;text-align:center;min-height:1em"></div>
       </div>
     </div>
-    <div class="sec" id="bleSec"><h2 id="bleHead"></h2>
+    <div data-tab="devices" class="sec" id="bleSec"><h2 id="bleHead"></h2>
       <div class="card">
         <div class="lightrow" style="margin-bottom:10px"><span id="bleStatusLabel"></span><span id="bleStatusVal" class="muted"></span></div>
         <div style="display:flex;gap:8px;margin-bottom:10px"><button class="pill" id="bleScanBtn" style="flex:1"></button><button class="pill hidden" id="bleForgetBtn" style="flex:1"></button></div>
@@ -347,7 +415,7 @@
       </div>
     </div>
 
-    <div class="sec" id="secSec"><h2 id="secHead"></h2>
+    <div data-tab="system" class="sec" id="secSec"><h2 id="secHead"></h2>
       <div class="card">
         <div class="lightrow"><span id="reqPwLabel"></span><div class="toggle" id="authToggle" role="switch" aria-pressed="false"></div></div>
         <div id="pwWrap" class="subrow" style="margin-top:6px">
@@ -362,7 +430,7 @@
       </div>
     </div>
 
-    <div class="sec"><h2 id="notifHead"></h2>
+    <div data-tab="notify" class="sec"><h2 id="notifHead"></h2>
       <div class="card">
         <div class="lightrow"><span id="notifOnLabel"></span><div class="toggle" id="notifToggle" role="switch" aria-pressed="false"></div></div>
         <div id="notifBody">
@@ -568,6 +636,125 @@ const RM_T={
     rmRemoteInfo:"Controlas truma-x a distancia ({kind}). Red, Bluetooth, firmware y seguridad se ajustan en la página del ESP: <b>{local}</b>."}
 };
 for(const k in RM_T) Object.assign(T[k],RM_T[k]);
+
+const LOG_T={
+  nl:{logbook:"Logboek",logAll:"Alles",logCmd:"Bediening",logFault:"Storingen",logConn:"Verbinding",logMeasure:"Metingen",logEmpty:"Nog niets gelogd.",
+    logMore:"Oudere laden",logToday:"Vandaag",logYesterday:"Gisteren",srcLocal:"lokaal",srcRemote:"op afstand",srcPanel:"op het paneel",
+    evFailed:"mislukt",evFaultClear:"{p} opgelost",evGasLow:"{p} laag: {v} %",evBleUp:"Verbonden met het paneel",evBleDown:"Verbinding met het paneel verloren",
+    evBrokerUp:"Op afstand bereikbaar via {h}",evBrokerDown:"Verbinding met {h} verbroken",evStart:"truma-x gestart",evStop:"truma-x gestopt",
+    evRemoteOn:"Toegang op afstand aangezet",evRemoteOff:"Toegang op afstand uitgezet",evNewKey:"Nieuwe link gemaakt; oude links werken niet meer",
+    warning:"Waarschuwing",error:"Storing",logLast:"laatst",logFaults24:"{n} storing(en) in 24 u",bottle:"fles"},
+  en:{logbook:"Logbook",logAll:"All",logCmd:"Control",logFault:"Faults",logConn:"Connection",logMeasure:"Readings",logEmpty:"Nothing logged yet.",
+    logMore:"Load older",logToday:"Today",logYesterday:"Yesterday",srcLocal:"local",srcRemote:"remote",srcPanel:"on the panel",
+    evFailed:"failed",evFaultClear:"{p} cleared",evGasLow:"{p} low: {v} %",evBleUp:"Connected to the panel",evBleDown:"Lost connection to the panel",
+    evBrokerUp:"Reachable remotely via {h}",evBrokerDown:"Connection to {h} lost",evStart:"truma-x started",evStop:"truma-x stopped",
+    evRemoteOn:"Remote access switched on",evRemoteOff:"Remote access switched off",evNewKey:"New link made; old links no longer work",
+    warning:"Warning",error:"Fault",logLast:"last",logFaults24:"{n} fault(s) in 24 h",bottle:"bottle"},
+  de:{logbook:"Logbuch",logAll:"Alles",logCmd:"Bedienung",logFault:"Störungen",logConn:"Verbindung",logMeasure:"Messwerte",logEmpty:"Noch nichts protokolliert.",
+    logMore:"Ältere laden",logToday:"Heute",logYesterday:"Gestern",srcLocal:"lokal",srcRemote:"aus der Ferne",srcPanel:"am Panel",
+    evFailed:"fehlgeschlagen",evFaultClear:"{p} behoben",evGasLow:"{p} niedrig: {v} %",evBleUp:"Mit dem Panel verbunden",evBleDown:"Verbindung zum Panel verloren",
+    evBrokerUp:"Aus der Ferne erreichbar über {h}",evBrokerDown:"Verbindung zu {h} getrennt",evStart:"truma-x gestartet",evStop:"truma-x gestoppt",
+    evRemoteOn:"Fernzugriff eingeschaltet",evRemoteOff:"Fernzugriff ausgeschaltet",evNewKey:"Neuer Link erstellt; alte Links gelten nicht mehr",
+    warning:"Warnung",error:"Störung",logLast:"zuletzt",logFaults24:"{n} Störung(en) in 24 h",bottle:"Flasche"},
+  fr:{logbook:"Journal",logAll:"Tout",logCmd:"Commandes",logFault:"Défauts",logConn:"Connexion",logMeasure:"Mesures",logEmpty:"Rien d'enregistré.",
+    logMore:"Plus ancien",logToday:"Aujourd'hui",logYesterday:"Hier",srcLocal:"local",srcRemote:"à distance",srcPanel:"sur le panneau",
+    evFailed:"échec",evFaultClear:"{p} résolu",evGasLow:"{p} bas : {v} %",evBleUp:"Connecté au panneau",evBleDown:"Connexion au panneau perdue",
+    evBrokerUp:"Accessible à distance via {h}",evBrokerDown:"Connexion à {h} perdue",evStart:"truma-x démarré",evStop:"truma-x arrêté",
+    evRemoteOn:"Accès à distance activé",evRemoteOff:"Accès à distance désactivé",evNewKey:"Nouveau lien créé ; les anciens ne marchent plus",
+    warning:"Avertissement",error:"Défaut",logLast:"dernier",logFaults24:"{n} défaut(s) en 24 h",bottle:"bouteille"},
+  it:{logbook:"Registro",logAll:"Tutto",logCmd:"Comandi",logFault:"Guasti",logConn:"Connessione",logMeasure:"Misure",logEmpty:"Ancora niente registrato.",
+    logMore:"Carica precedenti",logToday:"Oggi",logYesterday:"Ieri",srcLocal:"locale",srcRemote:"da remoto",srcPanel:"sul pannello",
+    evFailed:"fallito",evFaultClear:"{p} risolto",evGasLow:"{p} basso: {v} %",evBleUp:"Connesso al pannello",evBleDown:"Connessione al pannello persa",
+    evBrokerUp:"Raggiungibile da remoto via {h}",evBrokerDown:"Connessione a {h} persa",evStart:"truma-x avviato",evStop:"truma-x fermato",
+    evRemoteOn:"Accesso remoto attivato",evRemoteOff:"Accesso remoto disattivato",evNewKey:"Nuovo link creato; i vecchi non funzionano più",
+    warning:"Avviso",error:"Guasto",logLast:"ultimo",logFaults24:"{n} guasto/i in 24 h",bottle:"bombola"},
+  es:{logbook:"Registro",logAll:"Todo",logCmd:"Control",logFault:"Averías",logConn:"Conexión",logMeasure:"Mediciones",logEmpty:"Nada registrado aún.",
+    logMore:"Cargar anteriores",logToday:"Hoy",logYesterday:"Ayer",srcLocal:"local",srcRemote:"a distancia",srcPanel:"en el panel",
+    evFailed:"falló",evFaultClear:"{p} resuelto",evGasLow:"{p} bajo: {v} %",evBleUp:"Conectado al panel",evBleDown:"Conexión con el panel perdida",
+    evBrokerUp:"Accesible a distancia vía {h}",evBrokerDown:"Conexión con {h} perdida",evStart:"truma-x iniciado",evStop:"truma-x detenido",
+    evRemoteOn:"Acceso remoto activado",evRemoteOff:"Acceso remoto desactivado",evNewKey:"Enlace nuevo creado; los antiguos ya no funcionan",
+    warning:"Aviso",error:"Avería",logLast:"último",logFaults24:"{n} avería(s) en 24 h",bottle:"botella"}
+};
+for(const k in LOG_T) Object.assign(T[k],LOG_T[k]);
+
+const PARAM_T={
+  nl:{tp_RoomClimate:"Klimaat",tp_AirHeating:"Verwarming",tp_AirCooling:"Koeling",tp_AirCirculation:"Ventilatie",tp_AirDehumid:"Ontvochtigen",
+    tp_WaterHeating:"Warm water",tp_EnergySrc:"Energiebron",tp_Temperature:"Temperatuur",tp_Panel:"Paneel",tp_LevelControl:"Gasfles",
+    tp_VBat:"Accu",tp_FreshWater:"Verswater",tp_GreyWater:"Grijswater",tp_AmbientLight:"Sfeerverlichting",tp_Eol:"Voeding",tp_Switches:"Schakelaars",
+    tp_TimerConfig:"Timers",tp_TimeAndDate:"Tijd en datum",tp_System:"Systeem",tp_Identify:"Identificatie",
+    pp_Active:"Status",pp_Temp:"Temperatuur",pp_TgtTemp:"Streeftemperatuur",pp_Mode:"Stand",pp_Level:"Niveau",pp_Voltage:"Spanning",
+    pp_Location:"Locatie",pp_Value:"Waarde",pp_Intst:"Helderheid",pp_Vcc12:"Voedingsspanning",pp_Internal:"Binnen",pp_External:"Buiten",
+    loopOff:"uit",loopActive:"actief",loopIdle:"stand-by",pSettings:"Instellen",pReadings:"Metingen",pTech:"Technisch",pSearch:"Zoeken…"},
+  en:{tp_RoomClimate:"Climate",tp_AirHeating:"Heating",tp_AirCooling:"Cooling",tp_AirCirculation:"Ventilation",tp_AirDehumid:"Dehumidifying",
+    tp_WaterHeating:"Hot water",tp_EnergySrc:"Energy source",tp_Temperature:"Temperature",tp_Panel:"Panel",tp_LevelControl:"Gas bottle",
+    tp_VBat:"Battery",tp_FreshWater:"Fresh water",tp_GreyWater:"Grey water",tp_AmbientLight:"Ambient light",tp_Eol:"Power supply",tp_Switches:"Switches",
+    tp_TimerConfig:"Timers",tp_TimeAndDate:"Time and date",tp_System:"System",tp_Identify:"Identification",
+    pp_Active:"Status",pp_Temp:"Temperature",pp_TgtTemp:"Target temperature",pp_Mode:"Mode",pp_Level:"Level",pp_Voltage:"Voltage",
+    pp_Location:"Location",pp_Value:"Value",pp_Intst:"Brightness",pp_Vcc12:"Supply voltage",pp_Internal:"Inside",pp_External:"Outside",
+    loopOff:"off",loopActive:"active",loopIdle:"idle",pSettings:"Settings",pReadings:"Readings",pTech:"Technical",pSearch:"Search…"},
+  de:{tp_RoomClimate:"Klima",tp_AirHeating:"Heizung",tp_AirCooling:"Kühlung",tp_AirCirculation:"Lüftung",tp_AirDehumid:"Entfeuchten",
+    tp_WaterHeating:"Warmwasser",tp_EnergySrc:"Energiequelle",tp_Temperature:"Temperatur",tp_Panel:"Panel",tp_LevelControl:"Gasflasche",
+    tp_VBat:"Batterie",tp_FreshWater:"Frischwasser",tp_GreyWater:"Grauwasser",tp_AmbientLight:"Ambientelicht",tp_Eol:"Versorgung",tp_Switches:"Schalter",
+    tp_TimerConfig:"Timer",tp_TimeAndDate:"Uhrzeit und Datum",tp_System:"System",tp_Identify:"Identifikation",
+    pp_Active:"Status",pp_Temp:"Temperatur",pp_TgtTemp:"Solltemperatur",pp_Mode:"Stufe",pp_Level:"Füllstand",pp_Voltage:"Spannung",
+    pp_Location:"Ort",pp_Value:"Wert",pp_Intst:"Helligkeit",pp_Vcc12:"Versorgungsspannung",pp_Internal:"Innen",pp_External:"Außen",
+    loopOff:"aus",loopActive:"aktiv",loopIdle:"Bereitschaft",pSettings:"Einstellen",pReadings:"Messwerte",pTech:"Technisch",pSearch:"Suchen…"}
+};
+for(const k in PARAM_T) Object.assign(T[k],PARAM_T[k]);
+
+const TAB_T={
+  nl:{tabGeneral:"Algemeen",tabDevices:"Apparaten",tabConn:"Verbinding",tabNotify:"Meldingen",tabSystem:"Systeem"},
+  en:{tabGeneral:"General",tabDevices:"Devices",tabConn:"Connection",tabNotify:"Notifications",tabSystem:"System"},
+  de:{tabGeneral:"Allgemein",tabDevices:"Geräte",tabConn:"Verbindung",tabNotify:"Meldungen",tabSystem:"System"},
+  fr:{tabGeneral:"Général",tabDevices:"Appareils",tabConn:"Connexion",tabNotify:"Alertes",tabSystem:"Système"},
+  it:{tabGeneral:"Generale",tabDevices:"Dispositivi",tabConn:"Connessione",tabNotify:"Notifiche",tabSystem:"Sistema"},
+  es:{tabGeneral:"General",tabDevices:"Dispositivos",tabConn:"Conexión",tabNotify:"Avisos",tabSystem:"Sistema"}
+};
+for(const k in TAB_T) Object.assign(T[k],TAB_T[k]);
+
+const FOOT_T={
+  nl:{updLocalOnly:"installeren kan op de pagina van de ESP zelf",updConfirm:"truma-x bijwerken naar v{v}? Het apparaat start daarna opnieuw op (± 1 minuut)."},
+  en:{updLocalOnly:"install it from the ESP's own page",updConfirm:"Update truma-x to v{v}? The device restarts afterwards (about 1 minute)."},
+  de:{updLocalOnly:"Installation über die Seite des ESP",updConfirm:"truma-x auf v{v} aktualisieren? Das Gerät startet danach neu (ca. 1 Minute)."},
+  fr:{updLocalOnly:"à installer depuis la page de l'ESP",updConfirm:"Mettre truma-x à jour vers v{v} ? L'appareil redémarre ensuite (≈ 1 minute)."},
+  it:{updLocalOnly:"installabile dalla pagina dell'ESP",updConfirm:"Aggiornare truma-x a v{v}? Il dispositivo si riavvia poi (≈ 1 minuto)."},
+  es:{updLocalOnly:"se instala desde la página del ESP",updConfirm:"¿Actualizar truma-x a v{v}? El dispositivo se reinicia después (≈ 1 minuto)."}
+};
+for(const k in FOOT_T) Object.assign(T[k],FOOT_T[k]);
+// Truma fault / warning texts as the appliances report them
+const FAULT_L={
+  nl:{"None":"Geen","Frost warning":"Vorstwaarschuwing","Water level low":"Waterniveau laag","Ignition failure":"Ontstekingsstoring",
+      "Overheating":"Oververhitting","Low voltage":"Lage spanning","Fan failure":"Ventilatorstoring"},
+  de:{"None":"Keine","Frost warning":"Frostwarnung","Water level low":"Wasserstand niedrig","Ignition failure":"Zündstörung",
+      "Overheating":"Überhitzung","Low voltage":"Unterspannung","Fan failure":"Lüfterstörung"},
+  fr:{"None":"Aucun","Frost warning":"Alerte gel","Water level low":"Niveau d'eau bas","Ignition failure":"Défaut d'allumage"},
+  it:{"None":"Nessuno","Frost warning":"Allarme gelo","Water level low":"Livello acqua basso","Ignition failure":"Guasto accensione"},
+  es:{"None":"Ninguno","Frost warning":"Aviso de helada","Water level low":"Nivel de agua bajo","Ignition failure":"Fallo de encendido"}
+};
+for(const k in FAULT_L) Object.assign(T[k].levels,FAULT_L[k]);
+// language flags as small inline SVGs (flag emoji don't render on Windows)
+const FLAG={
+  nl:'<rect width="3" height="1" fill="#AE1C28"/><rect y="1" width="3" height="1" fill="#fff"/><rect y="2" width="3" height="1" fill="#21468B"/>',
+  de:'<rect width="3" height="1" fill="#000"/><rect y="1" width="3" height="1" fill="#DD0000"/><rect y="2" width="3" height="1" fill="#FFCE00"/>',
+  fr:'<rect width="1" height="3" fill="#002395"/><rect x="1" width="1" height="3" fill="#fff"/><rect x="2" width="1" height="3" fill="#ED2939"/>',
+  it:'<rect width="1" height="3" fill="#009246"/><rect x="1" width="1" height="3" fill="#fff"/><rect x="2" width="1" height="3" fill="#CE2B37"/>',
+  es:'<rect width="3" height="3" fill="#AA151B"/><rect y=".75" width="3" height="1.5" fill="#F1BF00"/>',
+  en:'<rect width="3" height="2" fill="#012169"/><path d="M0 0L3 2M3 0L0 2" stroke="#fff" stroke-width=".4"/><path d="M0 0L3 2M3 0L0 2" stroke="#C8102E" stroke-width=".15"/><path d="M1.5 0V2M0 1H3" stroke="#fff" stroke-width=".6"/><path d="M1.5 0V2M0 1H3" stroke="#C8102E" stroke-width=".35"/>'
+};
+const flagSvg=c=>'<svg class="flag" viewBox="0 0 3 '+(c==="en"?"2":"3")+'" preserveAspectRatio="none" aria-hidden="true">'+(FLAG[c]||"")+'</svg>';
+let SET_TAB="general"; try{ SET_TAB=localStorage.getItem("trumax_tab")||"general"; }catch(e){}
+function renderTabs(){
+  const tabs=[["general","tabGeneral"],["devices","tabDevices"],["conn","tabConn"],["notify","tabNotify"],["system","tabSystem"]];
+  const secs=[...document.querySelectorAll("#settings .sec[data-tab]")];
+  // a section hidden for its own reasons (remote mode, no display param…) doesn't count
+  const visible=tab=>secs.some(x=>x.dataset.tab===tab&&!x.classList.contains("hidden"));
+  const avail=tabs.filter(([id])=>visible(id)); if(!avail.some(([id])=>id===SET_TAB)&&avail.length) SET_TAB=avail[0][0];
+  const bar=$("#setTabs"); bar.innerHTML="";
+  for(const [id,k] of avail){ const b=document.createElement("button"); b.setAttribute("role","tab"); b.textContent=t(k);
+    b.setAttribute("aria-selected",id===SET_TAB); b.onclick=()=>{ SET_TAB=id; try{localStorage.setItem("trumax_tab",id);}catch(e){} renderTabs(); window.scrollTo(0,0); };
+    bar.appendChild(b); }
+  for(const x of secs) x.classList.toggle("tabhide", x.dataset.tab!==SET_TAB);
+}
 
 const LOGIN_T={
   nl:{loginTitle:"Vergrendeld",loginDesc:"Voer je toegangscode in om verder te gaan."},
@@ -924,18 +1111,53 @@ function renderLight(){ const card=$("#lightCard"); if(!ST.lightA){card.classLis
   tg.onclick=()=>{const nv=ST.lightA.value===1?0:1; ST.lightA.value=nv; tg.setAttribute("aria-pressed",nv===1); post("AmbientLight","Active",nv);};
   const s=$("#lightStep"); if(ST.lightS){s.style.display=""; s.value=ST.lightS.value; s.oninput=()=>{ST.lightS.value=+s.value;}; s.onchange=()=>post("AmbientLight","LightStep",+s.value);} else s.style.display="none"; }
 
-function renderAll(){ const box=$("#allParams"); box.innerHTML=""; const byDev={};
-  for(const p of ST.rest){ (byDev[p.device||"device"]=byDev[p.device||"device"]||[]).push(p); }
-  for(const dev of Object.keys(byDev)){ const h=document.createElement("div"); h.className="devname"; h.textContent=dev; box.appendChild(h);
-    for(const p of byDev[dev]) box.appendChild(prow(p)); }
-  if(!ST.rest.length) box.innerHTML='<div class="prow"><span class="val">'+t("noParams")+'</span></div>'; }
+const TECH_RE=/^(Location|Id|ID|Type|Sw|Hw|Serial|Version|Addr|Crc|Checksum|Index|Nr|Count|Flags?|Uid|Uuid|Muid)/;
+let PSEARCH="";
+function tName(tn){ const k="tp_"+tn, v=t(k); return v!==k?v:prettify(tn); }
+function paramName(p){ const k=PNAME[p.topic+"."+p.param]; if(k) return t(k); const k2="pp_"+p.param, v=t(k2); return v!==k2?v:prettify(p.param); }
+function renderAll(){ const box=$("#allParams"); box.innerHTML="";
+  const q=document.createElement("input"); q.className="psearch"; q.type="search"; q.placeholder=t("pSearch"); q.value=PSEARCH;
+  q.oninput=()=>{ PSEARCH=q.value; const pos=q.selectionStart; renderAll(); const n=$("#allParams .psearch"); n.focus(); n.setSelectionRange(pos,pos); };
+  box.appendChild(q);
+  const ql=PSEARCH.trim().toLowerCase();
+  const match=p=>!ql||[paramName(p),tName(p.topic),p.topic,p.param,p.device||""].some(x=>String(x).toLowerCase().includes(ql));
+  const byDev={};
+  for(const p of ST.rest){ if(!match(p)) continue; (byDev[p.device||"device"]=byDev[p.device||"device"]||[]).push(p); }
+  const chev='<svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>';
+  for(const dev of Object.keys(byDev)){
+    const h=document.createElement("div"); h.className="devname"; h.textContent=dev; box.appendChild(h);
+    const card=document.createElement("div"); card.className="card"; card.style.padding="4px 16px"; box.appendChild(card);
+    const tech=[], byTopic={};
+    for(const p of byDev[dev]){ if(!p.writable&&TECH_RE.test(p.param)) tech.push(p); else (byTopic[p.topic]=byTopic[p.topic]||[]).push(p); }
+    const topics=Object.keys(byTopic).sort((a,b)=>(byTopic[b].some(p=>p.writable)-byTopic[a].some(p=>p.writable))||tName(a).localeCompare(tName(b)));
+    const section=(title,list,open)=>{ const d=document.createElement("details"); d.className="ptopic"; if(open||ql) d.open=true;
+      const sm=document.createElement("summary"); sm.innerHTML='<span></span><small></small>'+chev;
+      sm.firstChild.textContent=title; sm.children[1].textContent=list.length; d.appendChild(sm);
+      const w=list.filter(p=>p.writable), r=list.filter(p=>!p.writable);
+      if(w.length&&r.length){ const a=document.createElement("div"); a.className="psub"; a.textContent=t("pSettings"); d.appendChild(a); }
+      w.forEach(p=>d.appendChild(prow(p)));
+      if(w.length&&r.length){ const b=document.createElement("div"); b.className="psub"; b.textContent=t("pReadings"); d.appendChild(b); }
+      r.forEach(p=>d.appendChild(prow(p)));
+      card.appendChild(d); };
+    topics.forEach(tn=>section(tName(tn),byTopic[tn],byTopic[tn].some(p=>p.writable)));
+    if(tech.length) section(t("pTech"),tech,false);
+  }
+  if(!ST.rest.length||!Object.keys(byDev).length){ const e=document.createElement("div"); e.className="prow"; e.innerHTML='<span class="val"></span>';
+    e.firstChild.textContent=t("noParams"); box.appendChild(e); } }
 function prow(p){ const row=document.createElement("div"); row.className="prow";
-  const k=document.createElement("div"); k.className="k"; k.textContent=prettify(p.param); row.appendChild(k);
+  const k=document.createElement("div"); k.className="k"; k.textContent=paramName(p);
+  const c=document.createElement("code"); c.textContent=p.topic+"."+p.param; k.appendChild(c); row.appendChild(k);
   if(!p.writable){ const v=document.createElement("div"); v.className="val"; v.textContent=fmtVal(p); row.appendChild(v); return row; }
   let inp; if(p.enum&&p.enum.length){ inp=document.createElement("select"); for(const e of p.enum){const o=document.createElement("option");o.value=e.value;o.textContent=tLevel(e.name);if(e.value===p.value)o.selected=true;inp.appendChild(o);} }
   else { inp=document.createElement("input"); inp.type="number"; if(p.min!=null)inp.min=p.min; if(p.max!=null)inp.max=p.max; inp.value=p.value; }
   inp.onchange=()=>post(p.topic,p.param,Number(inp.value)); row.appendChild(inp); return row; }
-function fmtVal(p){ if(p.enum){const e=p.enum.find(e=>e.value===p.value); if(e)return tLevel(e.name);} if(isTempParam(p))return fmtTemp(p.value,true); return String(p.value); }
+function fmtVal(p){ if(p.enum){const e=p.enum.find(e=>e.value===p.value); if(e)return tLevel(e.name);}
+  if(p.param==="Active"&&/^(Air|Water|RoomClimate)/.test(p.topic)) return t(["loopOff","loopActive","loopIdle"][p.value]||"loopOff");
+  if(isTempParam(p)||(p.topic==="Temperature"&&typeof p.value==="number"&&Math.abs(p.value)<1000)) return fmtTemp(p.value,true);
+  if(p.param==="Vcc12"||/mV$/.test(p.param)) return num1(p.value/1000)+" V";
+  if(p.topic==="VBat"&&p.param==="Voltage") return num1(p.value/10)+" V";
+  if(/Level$/.test(p.param)&&/Water|LevelControl/.test(p.topic)) return p.value+" %";
+  return String(p.value); }
 
 /* ---------- alerts / status / timers / display ---------- */
 function alertActive(p){ if(p.enum){const e=p.enum.find(e=>e.value===p.value); return e && !/none|ok|no error|geen|kein|aucun|nessun|ningun/i.test(e.name);} return p.value!==0; }
@@ -1050,7 +1272,7 @@ function renderSettings(){
   $("#setTitle").textContent=t("settings"); $("#langHead").textContent=t("language"); $("#unitHead").textContent=t("unit");
   $("#devHead").textContent=t("devices"); $("#remoteHead").textContent=t("remote");
   const lw=$("#langWrap"); lw.innerHTML="";
-  for(const [code,label] of LANGS){ const b=document.createElement("button"); b.className="pill"; b.textContent=label; b.setAttribute("aria-pressed",code===CFG.lang);
+  for(const [code,label] of LANGS){ const b=document.createElement("button"); b.className="pill"; b.innerHTML=flagSvg(code); b.appendChild(document.createTextNode(label)); b.setAttribute("aria-pressed",code===CFG.lang);
     b.onclick=()=>{CFG.lang=code; saveCfg(); document.documentElement.lang=code; renderAllViews();}; lw.appendChild(b); }
   const uw=$("#unitWrap"); uw.innerHTML="";
   for(const [code,label] of [["C",t("celsius")+" °C"],["F",t("fahrenheit")+" °F"]]){ const b=document.createElement("button"); b.className="pill"; b.textContent=label; b.setAttribute("aria-pressed",code===CFG.unit);
@@ -1077,6 +1299,7 @@ function renderSettings(){
   renderSecurity();
   renderNetwork();
   renderBle();
+  renderTabs();
 }
 
 /* firmware / OTA */
@@ -1291,7 +1514,7 @@ function trendChart(vals,interval,color,fmt){
 
 /* ---------- page router + home overview grid ---------- */
 let PAGE="home";
-const PAGE_IDS=["climate","fan","energy","light","gas","status","timers","more"];
+const PAGE_IDS=["climate","fan","energy","light","gas","status","timers","log","more"];
 const ICON={
   fan:'<circle cx="12" cy="12" r="2"/><path d="M12 10c3-4 8-4 8 0 0 2-4 2-8 2M12 14c-3 4-8 4-8 0 0-2 4-2 8-2"/>',
   energy:'<path d="M13 3 4 14h7l-1 7 9-11h-7z"/>',
@@ -1300,9 +1523,10 @@ const ICON={
   status:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
   timers:'<circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/>',
   water:'<path d="M12 3s6 7 6 11a6 6 0 0 1-12 0c0-4 6-11 6-11z"/>',
-  more:'<circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/>'
+  more:'<circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/>',
+  log:'<path d="M6 3h9l4 4v14H6z"/><path d="M9 11h7M9 15h7M9 7h4"/>'
 };
-function pageTitleFor(p){ return {climate:t("climate"),fan:t("fan"),energy:t("waterEnergy"),light:t("ambientLight"),gas:t("gasBottle"),status:t("status"),timers:t("timers"),more:t("more")}[p]||""; }
+function pageTitleFor(p){ return {climate:t("climate"),fan:t("fan"),energy:t("waterEnergy"),light:t("ambientLight"),gas:t("gasBottle"),status:t("status"),timers:t("timers"),log:t("logbook"),more:t("more")}[p]||""; }
 function showPage(p,noScroll){ PAGE=p;
   $("#home").style.display = p==="home"?"":"none";
   $("#pageTitle").classList.toggle("hidden", p==="home");
@@ -1310,6 +1534,7 @@ function showPage(p,noScroll){ PAGE=p;
   for(const x of PAGE_IDS){ const el=$("#pg-"+x); if(el) el.classList.toggle("hidden", p!==x); }
   if(p!=="home") $("#pageTitle").textContent=pageTitleFor(p);
   if(p==="gas"&&ST){ (ST.gasLevels||[]).forEach(b=>loadHistory("LevelControl."+b.param).then(()=>{ if(PAGE==="gas") renderGas(); })); }
+  if(p==="log") loadLog(true);
   if(p==="climate"&&ST&&ST.cur){ loadHistory(ST.cur.topic+"."+ST.cur.param).then(()=>{ if(PAGE==="climate") renderClimate(); }); }
   if(!noScroll) window.scrollTo(0,0);
 }
@@ -1366,16 +1591,30 @@ function renderHome(){ const g=$("#home"); g.className="grid"; g.innerHTML=""; i
   if(ST.lightA){ g.appendChild(tile("light",ICON.light,t("ambientLight"), ST.lightA.value?t("on"):t("off"))); }
   { const act=(ST.timers||[]).filter(x=>x.active).slice().sort((a,b)=>(a.start||"").localeCompare(b.start||""));
     g.appendChild(tile("timers",ICON.timers,t("timers"), act.length?act[0].start:"—", null, act.length?null:t("noneActive"))); }
+  if(LOGB.ok){ const ev=LOGB.entries.filter(e=>e.kind!=="measure"), last=ev[0];
+    const f24=ev.filter(e=>e.kind==="fault"&&e.ev!=="fault_clear"&&Date.now()/1000-e.ts<86400).length;
+    g.appendChild(tile("log",ICON.log,t("logbook"), last?logTime(last.ts):"—", f24?"#e23b3b":null,
+      f24?t("logFaults24",{n:f24}):(last?logText(last).main:null))); }
   if((ST.rest||[]).length){ g.appendChild(tile("more",ICON.more,t("more"), String(ST.rest.length))); }
 }
 
 /* ---------- views ---------- */
 function renderMain(){ if(!ST)return; renderAlerts(); renderClimate(); renderFan(); renderEnergy(); renderLight(); renderGas(); renderStatus(); renderTimers(); renderAll(); renderHome(); showPage(PAGE,true);
-  setMoreLabel(); $("#footnote").textContent = "truma·x" + ((VERSION||UPD.version) ? "  v"+(VERSION||UPD.version) : ""); }
+  setMoreLabel(); renderFoot(); }
+function renderFoot(){
+  const v=VERSION||UPD.version; $("#footnote").textContent="truma·x"+(v?"  v"+v:"");
+  const box=$("#footUpd");
+  if(!UPD.available||!UPD.latest){ box.classList.add("hidden"); return; }
+  box.classList.remove("hidden"); box.innerHTML='<span></span>';
+  box.firstChild.textContent=t("updateAvailable")+" v"+String(UPD.latest).replace(/^v/,"");
+  if(TRX){ const sm=document.createElement("small"); sm.textContent=t("updLocalOnly"); box.appendChild(sm); return; }
+  const b=document.createElement("button"); b.textContent=t("updateNow");
+  b.onclick=()=>{ if(confirm(t("updConfirm",{v:String(UPD.latest).replace(/^v/,"")}))){ box.innerHTML=""; box.textContent=t("rebooting"); doInstall(); } };
+  box.appendChild(b); }
 function setMoreLabel(){ const sum=$("#moreLabel"); const chev=sum.querySelector(".chev"); sum.textContent=t("more")+" "; sum.appendChild(chev); }
 function renderAllViews(){ renderMain(); renderSettings(); }
 
-$("#gear").onclick=()=>{ $("#main").classList.add("hidden"); $("#settings").classList.remove("hidden"); window.scrollTo(0,0); renderRemote(); };
+$("#gear").onclick=()=>{ $("#main").classList.add("hidden"); $("#settings").classList.remove("hidden"); window.scrollTo(0,0); renderRemote(); renderTabs(); };
 $("#back").onclick=()=>{ $("#settings").classList.add("hidden"); $("#main").classList.remove("hidden"); window.scrollTo(0,0); };
 $("#back2").onclick=()=>showPage("home");
 holdRepeat($("#minus"),()=>bump(-5)); holdRepeat($("#plus"),()=>bump(5));
@@ -1400,7 +1639,7 @@ async function refresh(full){
   if(!full && Date.now()<_holdUntil) return;      // user is still adjusting: don't jump back
   if(_busy) return; _busy=true;
   try{
-    if(full || Date.now()-_lastSettings>60000){ await loadSettings(); await loadUpdate(); await loadNetwork(); await loadBle(); await loadRemote(); _lastSettings=Date.now(); full=true; }
+    if(full || Date.now()-_lastSettings>60000){ await loadSettings(); await loadUpdate(); await loadNetwork(); await loadBle(); await loadRemote(); await loadLog(true); _lastSettings=Date.now(); full=true; }
     const s=await loadState(); if(!s) return;
     if(!REAL){ try{ const lt=JSON.parse(localStorage.getItem("trumax_timers")||"null"); if(lt) s.timers=lt; }catch(e){} }
     const key=JSON.stringify(s);
@@ -1410,6 +1649,81 @@ async function refresh(full){
     if(full || !$("#settings").classList.contains("hidden")) renderAllViews(); else renderMain();
   } finally { _busy=false; }
 }
+
+
+/* ---------- logbook ---------- */
+const LOGB={ok:false,entries:[],kind:"all",more:false};
+// friendly names for parameters (also used by the logbook); fallback: prettified name
+const PNAME={"RoomClimate.TgtTemp":"targetTemp","RoomClimate.Mode":"climate","WaterHeating.Mode":"hotWater",
+  "EnergySrc.GasLevel":"gas","EnergySrc.ElectricLevel":"electricLevel","EnergySrc.EnergySourcePrio":"energySource",
+  "AirCirculation.FanLevel":"fan","AirHeating.Mode":"heatMode","AirCooling.Mode":"fan","Panel.Intst":"brightness",
+  "AmbientLight.Active":"ambientLight","AmbientLight.LightStep":"ambientLight","System.Warning":"warning","System.Error":"error",
+  "FreshWater.Level":"freshWater","GreyWater.Level":"greyWater","VBat.Voltage":"battery"};
+function pLabel(tn,pn){ const k=PNAME[tn+"."+pn]; if(k) return t(k);
+  const b=/^(Scale)?Bottle(\d)$/.exec(pn); if(tn==="LevelControl"&&b) return t("gasLevel")+" "+b[2];
+  if(/Error|Warning|Fault/.test(pn)) return t(/Warning/.test(pn)?"warning":"error");
+  return prettify(tn)+" · "+prettify(pn); }
+function vLabel(e){ const v=e.v;
+  if(e.pn==="TgtTemp") return fmtTemp(v,true);
+  if(e.tn==="RoomClimate"&&e.pn==="Mode") return modeName(v)||(e.vn?tLevel(e.vn):String(v));
+  if(e.pn==="FanLevel") return v+" / 10";
+  if(e.pn==="Voltage") return num1(v/10)+" V";
+  if(e.vn) return tLevel(e.vn);
+  return String(v); }
+function logTime(ts){ return new Date(ts*1000).toLocaleTimeString(CFG.lang,{hour:"2-digit",minute:"2-digit"}); }
+function logDay(ts){ const d=new Date(ts*1000), n=new Date(); const k=x=>x.toDateString();
+  if(k(d)===k(n)) return t("logToday"); const y=new Date(n); y.setDate(n.getDate()-1); if(k(d)===k(y)) return t("logYesterday");
+  return d.toLocaleDateString(CFG.lang,{weekday:"long",day:"numeric",month:"long"}); }
+function logText(e){
+  const src={local:t("srcLocal"),remote:t("srcRemote"),panel:t("srcPanel")}[e.src]||"";
+  switch(e.ev){
+    case "set": return {main:pLabel(e.tn,e.pn)+" → "+vLabel(e), sub:[src,e.dev,e.ok===false?t("evFailed"):null].filter(Boolean).join(" · "), dot:e.ok===false?"fault":"cmd"};
+    case "fault": return {main:pLabel(e.tn,e.pn)+": "+(e.vn?tLevel(e.vn):String(e.v)), sub:e.dev||"", dot:/Warning/.test(e.pn)?"warn":"fault"};
+    case "fault_clear": return {main:t("evFaultClear",{p:pLabel(e.tn,e.pn)+(e.vn?" ("+tLevel(e.vn)+")":"")}), sub:e.dev||"", dot:"conn"};
+    case "gas_low": return {main:t("evGasLow",{p:pLabel(e.tn,e.pn),v:e.v}), sub:e.dev||"", dot:"warn"};
+    case "measure": { const b=[];
+      if(e.temp!=null) b.push(fmtTemp(e.temp,true)); if(e.vbat!=null) b.push(num1(e.vbat/10)+" V");
+      if(e.gas1!=null) b.push(t("gasLevel")+" "+e.gas1+(e.gas2!=null?" / "+e.gas2:"")+" %");
+      if(e.fresh!=null) b.push(t("freshWater")+" "+e.fresh+" %"); if(e.grey!=null) b.push(t("greyWater")+" "+e.grey+" %");
+      const sub=[e.mode!=null?modeName(e.mode):null, e.tgt!=null&&e.mode?t("targetTemp")+" "+fmtTemp(e.tgt,true):null].filter(Boolean).join(" · ");
+      return {main:b.join(" · ")||"—", sub, dot:"measure"}; }
+    case "ble_up": return {main:t("evBleUp"), sub:e.dev||"", dot:"conn"};
+    case "ble_down": return {main:t("evBleDown"), sub:"", dot:"warn"};
+    case "broker_up": return {main:t("evBrokerUp",{h:e.host||""}), sub:"", dot:"conn"};
+    case "broker_down": return {main:t("evBrokerDown",{h:e.host||""}), sub:"", dot:"warn"};
+    case "start": return {main:t("evStart"), sub:e.v||"", dot:"conn"};
+    case "stop": return {main:t("evStop"), sub:"", dot:"conn"};
+    case "remote_on": return {main:t("evRemoteOn"), sub:"", dot:"conn"};
+    case "remote_off": return {main:t("evRemoteOff"), sub:"", dot:"conn"};
+    case "newkey": return {main:t("evNewKey"), sub:"", dot:"warn"};
+  }
+  return {main:e.ev, sub:"", dot:"conn"}; }
+async function loadLog(reset){
+  try{
+    const kind=PAGE==="log"?LOGB.kind:"all";
+    const before=(!reset&&LOGB.more&&LOGB.entries.length)?"&before="+LOGB.entries[LOGB.entries.length-1].seq:"";
+    const r=await fetch("/api/log?kind="+kind+"&limit="+(PAGE==="log"?100:40)+before,{cache:"no-store",headers:authHeaders()});
+    if(!r.ok) throw 0; const j=await r.json(); if(!j||!Array.isArray(j.entries)) throw 0;
+    LOGB.ok=true; LOGB.more=!!j.more; LOGB.entries=reset?j.entries:LOGB.entries.concat(j.entries);
+  }catch(e){ if(reset&&PAGE!=="log") LOGB.ok=false; }
+  if(PAGE==="log") renderLog(); }
+function renderLog(){
+  const seg=$("#logSeg");
+  segFrom(seg,[["all","logAll"],["cmd","logCmd"],["fault","logFault"],["conn","logConn"],["measure","logMeasure"]].map(([v,k])=>({name:t(k),value:v})),
+    LOGB.kind, v=>{ LOGB.kind=v; LOGB.entries=[]; loadLog(true); });
+  const box=$("#logList"); box.innerHTML="";
+  if(!LOGB.entries.length){ box.innerHTML='<div class="prow"><span class="val"></span></div>'; box.querySelector(".val").textContent=t("logEmpty"); }
+  let day="";
+  for(const e of LOGB.entries){
+    const d=logDay(e.ts); if(d!==day){ day=d; const h=document.createElement("div"); h.className="logday"; h.textContent=d; box.appendChild(h); }
+    const x=logText(e), row=document.createElement("div"); row.className="logrow";
+    row.innerHTML='<span class="lt"></span><span class="ld '+x.dot+'"></span><span class="lx"><span></span><small></small></span>';
+    row.querySelector(".lt").textContent=logTime(e.ts); row.querySelector(".lx>span").textContent=x.main;
+    const sm=row.querySelector("small"); if(x.sub) sm.textContent=x.sub; else sm.remove();
+    box.appendChild(row); }
+  const mb=$("#logMoreBtn"); mb.textContent=t("logMore"); mb.classList.toggle("hidden",!LOGB.more); mb.onclick=()=>loadLog(false);
+}
+setInterval(()=>{ if(PAGE==="log"&&!document.hidden) loadLog(true); },5000);
 
 /* ---------- remote access: banner, toast, settings ---------- */
 function trxHost(u){ try{ return new URL(u).hostname; }catch(e){ return u||""; } }
