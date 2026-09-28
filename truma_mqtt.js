@@ -92,8 +92,16 @@ export class MqttLink {
     ws.binaryType = "arraybuffer";
     this.ws = ws;
     const parser = new Parser();
-    let lastRx = Date.now(), opened = false;
-    const connectTimer = setTimeout(() => { if (!this.connected) { try { ws.close(); } catch (e) {} } }, 12000);
+    let lastRx = Date.now(), opened = false, ended = false;
+    // A broker that never answers (no open, no error) must not block us: some browsers
+    // (Safari) never fire onclose for a socket closed while still connecting.
+    const connectTimer = setTimeout(() => {
+      if (this.connected || ended) return;
+      ended = true; ws.onopen = ws.onmessage = ws.onclose = ws.onerror = null;
+      try { ws.close(); } catch (e) {}
+      this.onStatus({ connected: false, url: this.url, error: "timeout" });
+      if (!this.stopped) { this.idx++; setTimeout(() => this._open(), 2000); }
+    }, 10000);
     ws.onopen = () => {
       opened = true;
       ws.send(connectPacket("tx-" + Math.random().toString(16).slice(2, 12), this.keepalive, user, pass));
@@ -121,6 +129,7 @@ export class MqttLink {
     };
     ws.onerror = () => {};
     ws.onclose = () => {
+      if (ended) return; ended = true;
       clearTimeout(connectTimer); clearInterval(this._ping);
       const was = this.connected; this.connected = false;
       this.onStatus({ connected: false, url: this.url, error: opened ? "closed" : "unreachable" });
@@ -138,5 +147,40 @@ export class MqttLink {
     if (!this.connected) return false;
     this.ws.send(publishPacket(topic, payload, retain));
     return true;
+  }
+}
+
+// Connects to every broker at once and treats them as one link. The phone does not know
+// which broker the ESP ended up on (a broker can be down for one side only), so it listens
+// on all of them and publishes on every connected one. Duplicates are harmless: the
+// replay window drops a second copy of a message and a response is taken only once.
+export class MultiLink {
+  constructor(urls, topics, { onMessage, onStatus, keepalive, WebSocketImpl } = {}) {
+    this.onStatusCb = onStatus || (() => {});
+    this.waiters = [];
+    this.links = urls.map((u) => new MqttLink([u], topics, {
+      onMessage, keepalive, WebSocketImpl, onStatus: () => this._status(),
+    }));
+  }
+  get connected() { return this.links.some((l) => l.connected); }
+  get urls() { return this.links.filter((l) => l.connected).map((l) => l.url); }
+  start() { this.links.forEach((l) => l.start()); return this; }
+  stop() { this.links.forEach((l) => l.stop()); }
+  _status() {
+    const up = this.urls;
+    this.onStatusCb({ connected: up.length > 0, url: up[0] || null, urls: up });
+    if (up.length) for (const w of this.waiters.splice(0)) { clearTimeout(w.t); w.res(); }
+  }
+  whenConnected(ms = 10000) {
+    if (this.connected) return Promise.resolve();
+    return new Promise((res, rej) => {
+      const w = { res, t: setTimeout(() => { this.waiters = this.waiters.filter((x) => x !== w); rej(new Error("no broker")); }, ms) };
+      this.waiters.push(w);
+    });
+  }
+  publish(topic, payload, retain = false) {
+    let any = false;
+    for (const l of this.links) any = l.publish(topic, payload, retain) || any;
+    return any;
   }
 }

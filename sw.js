@@ -1,7 +1,7 @@
 // Service worker for the home-screen app (only registered on https, e.g. GitHub Pages).
 // App shell: served from cache, refreshed in the background. /api/* and MQTT never touch it.
 // The key stays in the URL fragment / localStorage; the worker never sees it.
-const CACHE = "truma-x-v1";
+const CACHE = "truma-x-v2";
 const SHELL = ["./", "index.html", "truma_remote.js", "truma_mqtt.js", "manifest.webmanifest",
                "icon.svg", "icon-192.png", "icon-512.png", "apple-touch-icon.png"];
 self.addEventListener("install", (e) => {

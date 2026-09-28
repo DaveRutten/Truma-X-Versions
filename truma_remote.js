@@ -2,7 +2,7 @@
 // WebCrypto only, no dependencies. Also runs under Node >= 18 (globalThis.crypto),
 // which is how test/test_remote.mjs checks it against test/vectors/remote_v1.json.
 
-import { MqttLink as DefaultMqttLink } from "./truma_mqtt.js";
+import { MultiLink as DefaultMqttLink } from "./truma_mqtt.js";
 
 export const VERSION = 1;
 export const T_REQ = 1, T_RESP = 2, T_STATE = 3;

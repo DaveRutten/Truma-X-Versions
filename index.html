@@ -1409,7 +1409,7 @@ function trxRender(){
   else if(!c||!c.stateTs){ txt=t("rmBarWait"); }
   else if(c.isStale()){ cls="warn"; const d=new Date(c.stateTs*1000);
     txt=t("rmBarOffline",{t:d.toLocaleString(CFG.lang,{weekday:"short",hour:"2-digit",minute:"2-digit"})}); }
-  else { txt=t("rmBarOn",{b:trxHost(TRX.status.url)})+(TRX.view?" · "+t("rmBarView"):""); }
+  else { const hs=(TRX.status.urls||[TRX.status.url]).map(trxHost); txt=t("rmBarOn",{b:hs[0]+(hs.length>1?" +"+(hs.length-1):"")})+(TRX.view?" · "+t("rmBarView"):""); }
   bar.className="trxbar "+cls;
   bar.innerHTML='<span></span><a href="'+TRX_LOCAL_URL+'"></a>';
   bar.firstChild.textContent=txt; bar.lastChild.textContent=t("rmLocal");
