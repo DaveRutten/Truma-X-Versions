@@ -1,0 +1,13 @@
+{
+  "name": "truma-x",
+  "short_name": "truma-x",
+  "description": "Truma iNet X heating, water and gas — locally or remote, end-to-end encrypted.",
+  "display": "standalone",
+  "background_color": "#0c1c3e",
+  "theme_color": "#0c1c3e",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

@@ -1,0 +1,1542 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>truma-x</title>
+<meta name="theme-color" content="#0c1c3e">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="truma-x">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0c1c3e;--surface:#15294e;--surface2:#1d3866;--line:#2b4576;
+    --fg:#eef3fb;--muted:#9fb2d0;--accent:#3b9bf0;--accent-soft:#3b9bf033;--r:16px;
+    font-family:"Inter",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:radial-gradient(120% 80% at 50% -10%,#16386a 0%,var(--bg) 60%) fixed,var(--bg);
+    color:var(--fg);min-height:100dvh;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+    padding:max(14px,env(safe-area-inset-top)) 14px calc(28px + env(safe-area-inset-bottom))}
+  .wrap{max-width:460px;margin:0 auto}
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:.6rem;
+    background:#fff;color:#0c1c3e;border-radius:12px;padding:11px 14px;margin:0 0 16px;box-shadow:0 3px 12px #0004}
+  .brand{display:flex;align-items:center;gap:9px;font-family:"Space Grotesk";font-weight:600;letter-spacing:.01em;font-size:1.05rem}
+  .brand .logo{width:18px;height:18px;color:#2f6df0;flex:none}
+  .brand small{color:#5b6a86;font-family:"Inter";font-weight:500}
+  .right{display:flex;align-items:center;gap:12px}
+  .status{display:flex;align-items:center;gap:.4rem;font-size:.78rem;color:#5b6a86}
+  .dot{width:8px;height:8px;border-radius:50%;background:#9fb0cc}
+  .status.ok .dot{background:#2bb673;box-shadow:0 0 0 4px #2bb67322}
+  .status.mock .dot{background:#f0a022;box-shadow:0 0 0 4px #f0a02222}
+  .status.bad .dot{background:#e23b3b}
+  .iconbtn{background:none;border:none;color:#33507e;cursor:pointer;padding:4px;display:grid;place-items:center}
+  .iconbtn svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8}
+
+  .dial{position:relative;width:280px;height:280px;margin:6px auto 8px;touch-action:none;user-select:none}
+  .dial svg{width:100%;height:100%;display:block}
+  .track{fill:none;stroke:var(--line);stroke-width:14;stroke-linecap:round}
+  .value{fill:none;stroke:var(--accent);stroke-width:14;stroke-linecap:round;transition:stroke .5s ease,stroke-dasharray .35s cubic-bezier(.4,0,.2,1)}
+  .knob{fill:var(--fg);stroke:var(--accent);stroke-width:3;transition:stroke .5s ease}
+  .curmark{fill:var(--bg,#0b1b3a);stroke:var(--fg);stroke-width:3;opacity:.9;transition:cx .35s ease,cy .35s ease}
+  .dial.small{width:220px;height:220px}
+  .dial.small .temp{font-size:3.2rem}
+  .dial-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+  .temp{font-family:"Space Grotesk";font-weight:600;font-size:4.1rem;line-height:.9;letter-spacing:-.02em}
+  .temp sup{font-size:1.3rem;font-weight:500;top:-1.4rem;color:var(--muted);margin-left:2px}
+  .mode-name{color:var(--accent);font-weight:600;font-size:.95rem;transition:color .5s ease}
+  .cur{color:var(--muted);font-size:.82rem;margin-top:2px}
+  .stepper{display:flex;justify-content:center;gap:44px;margin:-6px 0 22px}
+  .stepper button{width:52px;height:52px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--fg);font-size:1.5rem;line-height:1;cursor:pointer;display:grid;place-items:center}
+  .stepper button:active{background:var(--surface2)}
+  .stepper button:disabled{opacity:.35;cursor:default}
+
+  .modes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:22px}
+  .mode{min-height:66px;border:1px solid var(--line);background:var(--surface);border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;color:var(--muted);transition:.18s;padding:8px 4px}
+  .mode svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.7}
+  .mode span{font-size:.66rem;text-align:center;line-height:1.05;word-break:break-word}
+  .mode[aria-pressed="true"]{color:var(--accent);border-color:var(--accent);background:var(--accent-soft)}
+
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:12px}
+  .card h3{margin:0 0 12px;font-size:.82rem;font-weight:600;color:var(--muted)}
+  .seg{display:flex;gap:6px;flex-wrap:wrap}
+  .seg button{flex:1;min-width:60px;padding:11px 4px;border-radius:11px;border:1px solid var(--line);background:var(--surface2);color:var(--muted);font-size:.82rem;cursor:pointer;transition:.15s}
+  .seg button[aria-pressed="true"]{color:#0b1017;background:var(--accent);border-color:var(--accent);font-weight:600}
+  .subrow{margin-bottom:16px}
+  .subrow:last-child{margin-bottom:0}
+  .subrow>label{display:block;font-size:.74rem;color:var(--muted);margin-bottom:8px}
+  .lightrow{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+  .toggle{width:52px;height:30px;border-radius:999px;border:1px solid var(--line);background:var(--surface2);position:relative;cursor:pointer;transition:.2s}
+  .toggle::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:var(--muted);transition:.2s}
+  .toggle[aria-pressed="true"]{background:var(--accent);border-color:var(--accent)}
+  .toggle[aria-pressed="true"]::after{left:25px;background:#0b1017}
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:999px;background:var(--surface2);outline:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--accent);cursor:pointer;border:3px solid var(--surface)}
+  input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--accent);cursor:pointer;border:3px solid var(--surface)}
+
+  details.all{margin-top:6px}
+  details.all>summary{list-style:none;cursor:pointer;color:var(--muted);font-size:.82rem;padding:12px 4px;display:flex;align-items:center;gap:8px}
+  details.all>summary::-webkit-details-marker{display:none}
+  details.all>summary .chev{transition:.2s;margin-left:auto}
+  details.all[open]>summary .chev{transform:rotate(180deg)}
+  .devname{color:var(--muted);font-size:.68rem;letter-spacing:.04em;margin:14px 2px 6px}
+  .prow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 2px;border-bottom:1px solid var(--line)}
+  .prow:last-child{border-bottom:none}
+  .prow .k{font-size:.85rem}
+  .prow .k small{display:block;color:var(--muted);font-size:.72rem;margin-top:3px}
+  .prow select,.prow input[type=number]{background:var(--surface2);color:var(--fg);border:1px solid var(--line);border-radius:9px;padding:8px 10px;font-size:.85rem;max-width:150px}
+  .prow .val{color:var(--muted);font-size:.85rem;font-variant-numeric:tabular-nums}
+  .foot{color:var(--muted);font-size:.72rem;text-align:center;margin-top:22px;line-height:1.5}
+  .hidden{display:none !important}
+  .trxbar{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--surface);border:1px solid var(--line);
+    border-radius:12px;padding:9px 12px;margin:-6px 0 14px;font-size:.8rem;color:var(--muted)}
+  .trxbar.warn{border-color:#f0a02266;color:#f3c77a}.trxbar.bad{border-color:#e23b3b66;color:#f39b9b}
+  .trxbar a{color:var(--accent);text-decoration:none;white-space:nowrap}
+  .trxtoast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#e23b3b;color:#fff;
+    padding:10px 16px;border-radius:12px;font-size:.84rem;z-index:30;box-shadow:0 6px 20px #0006;max-width:90vw;text-align:center}
+  .rmqr{background:#fff;border-radius:12px;padding:10px;margin:10px auto;width:220px;height:220px}
+  .rmqr img{width:100%;height:100%;display:block}
+  .rmlink{width:100%;background:var(--surface2);color:var(--fg);border:1px solid var(--line);border-radius:9px;padding:10px;font-size:.78rem}
+  .rmb{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--line);font-size:.84rem}
+  .rmb:last-child{border-bottom:none}.rmb .nm{flex:1}.rmb small{color:var(--muted)}
+  .rmb button{background:none;border:1px solid var(--line);color:var(--muted);border-radius:8px;padding:3px 8px;cursor:pointer}
+
+  /* settings */
+  .settitle{font-family:"Space Grotesk";font-weight:600;font-size:1.2rem;margin:0}
+  .sec{margin-bottom:22px}
+  .sec>h2{font-size:.72rem;letter-spacing:.06em;color:var(--muted);margin:0 2px 10px;font-weight:600;text-transform:uppercase}
+  .pillwrap{display:flex;flex-wrap:wrap;gap:8px}
+  .pill{padding:10px 14px;border-radius:11px;border:1px solid var(--line);background:var(--surface);color:var(--muted);cursor:pointer;font-size:.86rem}
+  .pill[aria-pressed="true"]{color:#0b1017;background:var(--accent);border-color:var(--accent);font-weight:600}
+  .devcard{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:10px}
+  .devcard .dh{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+  .devcard .dh b{font-size:.95rem}
+  .devcard .badge{font-size:.68rem;color:var(--accent);border:1px solid var(--accent);border-radius:999px;padding:2px 8px}
+  .devcard .meta{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:.8rem;color:var(--muted)}
+  .devcard .meta span:nth-child(even){color:var(--fg);font-variant-numeric:tabular-nums;text-align:right}
+  .info{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;font-size:.84rem;color:var(--muted);line-height:1.55}
+  .info b{color:var(--fg)}
+  #alerts{margin-bottom:18px}
+  .alert{border-radius:12px;padding:12px 14px;font-size:.85rem;margin-bottom:8px;border:1px solid;display:flex;gap:8px;align-items:center}
+  .alert::before{content:"";width:8px;height:8px;border-radius:50%;flex:none;background:currentColor}
+  .alert.err{background:#3a1414;border-color:#5a1e1e;color:#ff9b9b}
+  .alert.warn{background:#3a2e12;border-color:#5a481e;color:#ffcf7a}
+  .alert-x{background:none;border:none;color:currentColor;opacity:.7;font-size:1.2rem;line-height:1;cursor:pointer;flex:none;padding:0 2px}
+  .alert-x:hover{opacity:1}
+  .barrow{margin-bottom:14px}
+  .barrow:last-child{margin-bottom:0}
+  .barrow .bl{display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:6px}
+  .barrow .bl .bv{color:var(--muted);font-variant-numeric:tabular-nums}
+  .track2{height:8px;border-radius:999px;background:var(--surface2);overflow:hidden}
+  .fill2{height:100%;border-radius:999px;transition:width .4s ease}
+  #timersBody .toggle{flex:none}
+  #gasSection{margin-bottom:12px}
+  .gasgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px}
+  .gascard{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 14px 16px;text-align:center}
+  .gastitle{font-size:.76rem;color:var(--muted);line-height:1.3;margin-bottom:10px;min-height:2.4em;display:flex;align-items:center;justify-content:center}
+  .gasrow{display:flex;align-items:center;justify-content:center;gap:12px}
+  .gasrow .bottle{width:38px;height:56px;color:var(--fg);flex:none}
+  .gaspct{font-family:"Space Grotesk";font-weight:600;font-size:1.7rem;line-height:1}
+  .gaskg{color:var(--muted);font-size:.92rem;margin-top:2px;font-variant-numeric:tabular-nums}
+  .gasbar{height:6px;border-radius:999px;background:var(--surface2);margin-top:12px;overflow:hidden}
+  .gasbar>div{height:100%;border-radius:999px;transition:width .4s ease}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .tile{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:15px;cursor:pointer;min-height:104px;display:flex;flex-direction:column;justify-content:space-between;transition:.15s}
+  .tile:active{background:var(--surface2)}
+  .tile .th{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:.8rem}
+  .tile .th svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.8;flex:none}
+  .tile.accent .th{color:var(--accent)}
+  .tile .tv{font-family:"Space Grotesk";font-weight:600;font-size:1.5rem;line-height:1;margin-top:10px}
+  .tile .ts{color:var(--muted);font-size:.78rem;margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .pagetitle{font-family:"Space Grotesk";font-weight:600;font-size:1.15rem;margin:2px 2px 14px}
+  .spark{width:100%;height:46px;display:block;margin-top:10px}
+  .gashist{margin-top:8px}
+  .est{color:var(--muted);font-size:.76rem;text-align:center;margin-top:6px}
+  #climateHistory{max-width:320px;margin:0 auto 8px}
+  .trend{margin-top:6px}
+  .taxis{display:flex;justify-content:space-between;gap:6px;color:var(--muted);font-size:.68rem;margin-top:5px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ===== MAIN ===== -->
+  <div id="main">
+    <div class="topbar">
+      <button class="iconbtn hidden" id="back2" aria-label="Back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></button>
+      <div class="brand"><svg class="logo" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="10" width="4" height="11" rx="1"/><rect x="10" y="4" width="4" height="17" rx="1"/><rect x="17" y="13" width="4" height="8" rx="1"/></svg>truma&#8202;<small>·x</small></div>
+      <div class="right">
+        <div class="status" id="status"><span class="dot"></span><span id="statustext"></span></div>
+        <button class="iconbtn" id="gear" aria-label="Settings">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 0 1-4 0v-.1A1.6 1.6 0 0 0 7 19.4a1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0-1.1-2.7H1a2 2 0 0 1 0-4h.1A1.6 1.6 0 0 0 2.6 7a1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.6 1.6 0 0 0 7 2.6h.1A1.6 1.6 0 0 0 8 1.1V1a2 2 0 0 1 4 0v.1A1.6 1.6 0 0 0 15 2.6a1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8V7a1.6 1.6 0 0 0 1.5 1H23a2 2 0 0 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div id="trxBar" class="trxbar hidden"></div>
+    <div id="alerts" style="display:none"></div>
+
+    <div id="pageTitle" class="pagetitle hidden"></div>
+    <div id="home"></div>
+
+    <div class="page hidden" id="pg-climate">
+    <div class="dial" id="dial">
+      <svg viewBox="0 0 240 240" aria-hidden="true">
+        <circle class="track" cx="120" cy="120" r="100" transform="rotate(135 120 120)" stroke-dasharray="471 628"></circle>
+        <circle class="value" id="arc" cx="120" cy="120" r="100" transform="rotate(135 120 120)" stroke-dasharray="0 628"></circle>
+        <circle class="curmark" id="curMark" cx="120" cy="20" r="6" style="opacity:0"></circle>
+        <circle class="knob" id="knob" cx="120" cy="20" r="9"></circle>
+      </svg>
+      <div class="dial-center">
+        <div class="temp"><span id="tgt">--</span><sup id="unit">&deg;C</sup></div>
+        <div class="mode-name" id="modeName">--</div>
+        <div class="cur" id="cur"></div>
+      </div>
+    </div>
+    <div class="stepper">
+      <button id="minus" aria-label="-">&minus;</button>
+      <button id="plus" aria-label="+">+</button>
+    </div>
+    <div class="modes" id="modes"></div>
+    <div class="card hidden" id="climSrcCard" style="margin-top:14px">
+      <div class="subrow" id="climSrcRow"><label id="climSrcLabel"></label><div class="seg" id="climSrcSeg"></div></div>
+      <div class="subrow hidden" id="climElecRow"><label id="climElecLabel"></label><div class="seg" id="climElecSeg"></div></div>
+      <div class="subrow hidden" id="climHeatRow" style="margin:0"><label id="climHeatLabel"></label><div class="seg" id="climHeatSeg"></div></div>
+    </div>
+    <div id="climateHistory"></div>
+    </div>
+
+    <div class="page hidden" id="pg-fan">
+    <div class="card hidden" id="fanCard"><h3 id="fanTitle"></h3><div class="seg" id="fanSeg"></div></div>
+    </div>
+
+    <div class="page hidden" id="pg-energy" style="--accent:#f0913b;--accent-soft:#f0913b22">
+    <div class="dial small hidden" id="wDial">
+      <svg viewBox="0 0 240 240" aria-hidden="true">
+        <circle class="track" cx="120" cy="120" r="100" transform="rotate(135 120 120)" stroke-dasharray="471 628"></circle>
+        <circle class="value" id="wArc" cx="120" cy="120" r="100" transform="rotate(135 120 120)" stroke-dasharray="0 628"></circle>
+        <circle class="curmark" id="wMark" cx="120" cy="20" r="6" style="opacity:0"></circle>
+      </svg>
+      <div class="dial-center">
+        <div class="temp"><span id="wTgt">--</span><sup id="wUnit">&deg;C</sup></div>
+        <div class="mode-name" id="wState"></div>
+        <div class="cur" id="wCur"></div>
+      </div>
+    </div>
+    <div class="card hidden" id="energyCard">
+      <h3 id="energyTitle" class="hidden"></h3>
+      <div class="subrow" id="srcRow"><label id="srcLabel"></label><div class="seg" id="srcSeg"></div></div>
+      <div class="subrow hidden" id="elecRow"><label id="elecLabel"></label><div class="seg" id="elecSeg"></div></div>
+      <div class="subrow" id="waterRow"><label id="waterLabel"></label><div class="seg" id="waterSeg"></div></div>
+    </div>
+    </div>
+
+    <div class="page hidden" id="pg-light">
+    <div class="card hidden" id="lightCard">
+      <div class="lightrow"><h3 style="margin:0" id="lightTitle"></h3><div class="toggle" id="lightToggle" role="switch" aria-pressed="false"></div></div>
+      <input type="range" id="lightStep" min="0" max="100" step="1" value="0">
+    </div>
+    </div>
+
+    <div class="page hidden" id="pg-gas"><div id="gasSection" style="display:none"></div></div>
+    <div class="page hidden" id="pg-status"><div class="card hidden" id="statusCard"><h3 id="statusTitle"></h3><div id="statusBody"></div></div></div>
+    <div class="page hidden" id="pg-timers"><div class="card hidden" id="timersCard"><h3 id="timersTitle"></h3><div id="timersBody"></div></div></div>
+
+    <div class="page hidden" id="pg-more">
+    <details class="all" open>
+      <summary id="moreLabel"><svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg></summary>
+      <div id="allParams"></div>
+    </details>
+    </div>
+
+    <div class="foot"><span id="footnote"></span></div>
+  </div>
+
+  <!-- ===== SETTINGS ===== -->
+  <div id="settings" class="hidden">
+    <div class="topbar">
+      <button class="iconbtn" id="back" aria-label="Back"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+      <h1 class="settitle" id="setTitle"></h1>
+      <span style="width:30px"></span>
+    </div>
+
+    <div class="sec"><h2 id="langHead"></h2><div class="pillwrap" id="langWrap"></div></div>
+    <div class="sec"><h2 id="unitHead"></h2><div class="pillwrap" id="unitWrap"></div></div>
+    <div class="sec" id="ovSec"><h2 id="ovHead"></h2>
+      <div class="card">
+        <div class="subrow"><label id="statusTileLabel"></label><select id="statusMetricSel" style="background:var(--surface2);color:var(--fg);border:1px solid var(--line);border-radius:9px;padding:9px"></select></div>
+        <div class="subrow"><label id="climTileLabel"></label><select id="climMetricSel" style="background:var(--surface2);color:var(--fg);border:1px solid var(--line);border-radius:9px;padding:9px"></select></div>
+        <div class="subrow" style="margin:0"><label id="gasTileLabel"></label><select id="gasMetricSel" style="background:var(--surface2);color:var(--fg);border:1px solid var(--line);border-radius:9px;padding:9px"></select></div>
+      </div>
+    </div>
+    <div class="sec"><h2 id="devHead"></h2>
+      <div class="card" style="margin-bottom:10px">
+        <div class="subrow" style="margin:0"><label id="bleNameLabel" for="bleNameInput"></label><input type="text" id="bleNameInput" maxlength="32" placeholder="truma-x" style="width:100%;background:var(--surface2);color:var(--fg);border:1px solid var(--line);border-radius:9px;padding:10px"></div>
+        <div id="bleNameHint" class="muted" style="font-size:.8rem;margin-top:6px"></div>
+      </div>
+      <div id="devList"></div></div>
+    <div class="sec hidden" id="displaySec"><h2 id="dispHead"></h2>
+      <div class="card"><div class="subrow" style="margin:0"><label id="brightLabel"></label><input type="range" id="brightRange" min="10" max="100" value="80"></div></div>
+    </div>
+    <div class="sec" id="scaleSec"><h2 id="scaleHead"></h2>
+      <div class="card"><div id="scaleBody"></div></div>
+    </div>
+    <div class="sec" id="fwSec"><h2 id="fwHead"></h2>
+      <div class="card">
+        <div class="lightrow" style="margin-bottom:10px"><span id="verLabel"></span><span id="verVal" class="muted"></span></div>
+        <div class="subrow"><label id="repoLabel"></label><input type="text" id="repoInput" placeholder="owner/truma-x" style="width:100%;background:var(--surface2);color:var(--fg);border:1px solid var(--line);border-radius:9px;padding:10px"></div>
+        <div class="subrow"><label id="manLabel"></label><input type="text" id="manInput" placeholder="https://…/firmware/latest.json" style="width:100%;background:var(--surface2);color:var(--fg);border:1px solid var(--line);border-radius:9px;padding:10px"></div>
+        <div class="lightrow" style="margin-bottom:12px"><span id="autoLabel"></span><div class="toggle" id="autoToggle" role="switch" aria-pressed="false"></div></div>
+        <div style="display:flex;gap:8px"><button class="pill" id="checkBtn" style="flex:1"></button><button class="pill hidden" id="installBtn" style="flex:1"></button></div>
+        <div id="updMsg" class="muted" style="font-size:.82rem;margin-top:10px;text-align:center;min-height:1em"></div>
+        <details style="margin-top:12px"><summary id="manualLabel" style="cursor:pointer;color:var(--muted);font-size:.82rem;list-style:none"></summary>
+          <input type="file" id="fwFile" accept=".bin" style="width:100%;margin-top:10px;color:var(--muted);font-size:.85rem">
+          <button class="pill" id="fwBtn" style="width:100%;margin-top:10px"></button>
+          <div id="fwProg" style="display:none;margin-top:10px"><div class="track2"><div class="fill2" id="fwFill" style="width:0;background:var(--accent)"></div></div><div id="fwMsg" class="muted" style="font-size:.8rem;margin-top:6px;text-align:center"></div></div>
+        </details>
+      </div>
+    </div>
+    <div class="sec" id="rmSec"><h2 id="remoteHead"></h2>
+      <div class="card" id="rmLocalCard">
+        <div class="lightrow"><span id="rmEnableLabel"></span><div class="toggle" id="rmToggle" role="switch" aria-pressed="false"></div></div>
+        <div id="rmState" class="muted" style="font-size:.82rem;margin-top:8px;min-height:1em"></div>
+        <div id="rmBody" class="hidden">
+          <div class="pillwrap" id="rmKind" style="margin-top:10px"></div>
+          <div class="rmqr" id="rmQr"><img id="rmQrImg" alt="QR"></div>
+          <input class="rmlink" id="rmLink" readonly>
+          <div style="display:flex;gap:8px;margin-top:8px"><button class="pill" id="rmCopy" style="flex:1"></button><button class="pill" id="rmShare" style="flex:1"></button></div>
+          <div class="subrow" style="margin-top:14px"><label id="rmBrokersLabel"></label><div id="rmBrokers"></div></div>
+          <div class="subrow"><label id="rmCustomLabel"></label><input type="text" id="rmCustom" class="rmlink" placeholder="wss://user:pass@mqtt.example.com/mqtt"></div>
+          <div id="rmPortWarn" class="muted hidden" style="font-size:.8rem;margin:-4px 0 10px;color:#f3c77a"></div>
+          <button class="pill" id="rmNew" style="width:100%"></button>
+        </div>
+        <div class="info" id="rmNote" style="margin-top:12px;border:none;padding:0;background:none"></div>
+      </div>
+      <div class="card hidden" id="rmRemoteCard">
+        <div id="rmRemoteInfo" class="muted" style="font-size:.84rem;line-height:1.55"></div>
+        <button class="pill" id="rmForget" style="width:100%;margin-top:12px"></button>
+      </div>
+    </div>
+
+    <div class="sec" id="netSec"><h2 id="netHead"></h2>
+      <div class="card">
+        <div class="pillwrap" id="netModeWrap" style="margin-bottom:10px"></div>
+        <div class="subrow" id="wifiRow"><label id="wifiSsidLabel"></label><input type="text" id="wifiSsidInput" style="width:100%;background:var(--surface2);color:var(--fg);border:1px solid var(--line);border-radius:9px;padding:10px"></div>
+        <div class="subrow" id="wifiPassRow"><label id="wifiPassLabel"></label><input type="password" id="wifiPassInput" autocomplete="new-password" style="width:100%;background:var(--surface2);color:var(--fg);border:1px solid var(--line);border-radius:9px;padding:10px"></div>
+        <div class="subrow" id="apnRow"><label id="apnLabel"></label><input type="text" id="apnInput" style="width:100%;background:var(--surface2);color:var(--fg);border:1px solid var(--line);border-radius:9px;padding:10px"></div>
+        <div style="display:flex;gap:8px;margin-top:4px"><button class="pill" id="netSaveBtn" style="flex:1"></button></div>
+        <div id="netStatus" class="muted" style="font-size:.82rem;margin-top:10px;text-align:center;min-height:1em"></div>
+      </div>
+    </div>
+    <div class="sec" id="bleSec"><h2 id="bleHead"></h2>
+      <div class="card">
+        <div class="lightrow" style="margin-bottom:10px"><span id="bleStatusLabel"></span><span id="bleStatusVal" class="muted"></span></div>
+        <div style="display:flex;gap:8px;margin-bottom:10px"><button class="pill" id="bleScanBtn" style="flex:1"></button><button class="pill hidden" id="bleForgetBtn" style="flex:1"></button></div>
+        <div id="bleList"></div>
+      </div>
+    </div>
+
+    <div class="sec" id="secSec"><h2 id="secHead"></h2>
+      <div class="card">
+        <div class="lightrow"><span id="reqPwLabel"></span><div class="toggle" id="authToggle" role="switch" aria-pressed="false"></div></div>
+        <div id="pwWrap" class="subrow" style="margin-top:6px">
+          <label id="tokenLabel"></label>
+          <div style="display:flex;gap:8px">
+            <input type="password" id="tokenInput" autocomplete="new-password" style="flex:1;background:var(--surface2);color:var(--fg);border:1px solid var(--line);border-radius:9px;padding:10px">
+            <button class="pill" id="tokenSave"></button>
+          </div>
+        </div>
+        <div class="lightrow" style="margin-top:6px"><span id="httpsLabel"></span><div class="toggle" id="tlsToggle" role="switch" aria-pressed="false"></div></div>
+        <div class="info" id="secNote" style="margin-top:10px;border:none;padding:0;background:none"></div>
+      </div>
+    </div>
+
+    <div class="sec"><h2 id="notifHead"></h2>
+      <div class="card">
+        <div class="lightrow"><span id="notifOnLabel"></span><div class="toggle" id="notifToggle" role="switch" aria-pressed="false"></div></div>
+        <div id="notifBody">
+          <div class="subrow"><label id="webhookLabel"></label><input type="text" id="webhookInput" placeholder="https://ntfy.sh/my-caravan" style="width:100%;background:var(--surface2);color:var(--fg);border:1px solid var(--line);border-radius:9px;padding:10px"></div>
+          <div class="subrow"><label id="gasThrLabel"></label><input type="range" id="gasThr" min="5" max="50" step="5"></div>
+          <div class="subrow"><label id="waterThrLabel"></label><input type="range" id="waterThr" min="5" max="50" step="5"></div>
+          <div class="subrow" style="margin:0"><label id="greyThrLabel"></label><input type="range" id="greyThr" min="50" max="100" step="5"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="login" class="hidden" style="position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px;z-index:20">
+    <div style="max-width:340px;width:100%;text-align:center">
+      <div class="brand" style="margin-bottom:6px">truma&#8202;<small>·x</small></div>
+      <h1 class="settitle" id="loginTitle" style="margin:0 0 6px"></h1>
+      <p id="loginDesc" style="color:var(--muted);font-size:.86rem;margin:0 0 18px;line-height:1.5"></p>
+      <label id="loginLabel" style="display:block;text-align:left;font-size:.74rem;color:var(--muted);margin:0 2px 8px"></label>
+      <input type="password" id="loginToken" autocomplete="current-password" style="width:100%;background:var(--surface2);color:var(--fg);border:1px solid var(--line);border-radius:11px;padding:14px;font-size:1rem">
+      <div id="loginErr" style="color:#f0603b;font-size:.8rem;margin-top:8px;min-height:1em"></div>
+      <button class="pill" id="loginBtn" style="width:100%;margin-top:14px;padding:14px"></button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+"use strict";
+
+/* ---------------- remote mode (docs/remote-protocol.md) ----------------
+   Opened from a link with #k=... (control) or #v=... (view-only), e.g. on GitHub Pages:
+   every fetch("/api/...") then goes end-to-end encrypted over MQTT instead of HTTP.
+   Opened from the ESP / bridge itself without such a link: plain local HTTP as before. */
+const TRX_LOCAL_URL="http://truma-x.local/";
+var TRX=(function(){          // var: the module script below reads window.TRX
+  const hasKey=s=>/(^|&)(k|v)=/.test(s||"");
+  const localHost=h=>!h||h==="localhost"||h.endsWith(".local")||h.startsWith("[")||
+    /^(127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|100\.(6[4-9]|[7-9]\d|1[01]\d|12[0-7])\.)/.test(h);
+  const hash=location.hash.slice(1); let link="";
+  if(hasKey(hash)){ link=hash; try{ localStorage.setItem("trumax_link",hash); }catch(e){} }
+  else if(!localHost(location.hostname)){ try{ link=localStorage.getItem("trumax_link")||""; }catch(e){} }
+  if(!hasKey(link)) return null;
+  const st={link, view:!/(^|&)k=/.test(link), client:null, status:{connected:false}, mismatch:0, error:""};
+  st.ready=new Promise(r=>{ st._ready=r; });
+  const realFetch=window.fetch.bind(window);
+  window.fetch=async(u,o)=>(typeof u==="string"&&u.startsWith("/api/"))?(await st.ready).fetch(u,o):realFetch(u,o);
+  st.isStale=()=>!st.client||st.client.isStale();
+  return st;
+})();
+if(TRX) document.documentElement.classList.add("remote");
+
+/* ---------------- i18n ---------------- */
+const LANGS = [["nl","Nederlands"],["de","Deutsch"],["en","English"],["fr","Français"],["it","Italiano"],["es","Español"]];
+const T = {
+  nl:{settings:"Instellingen",language:"Taal",unit:"Temperatuureenheid",celsius:"Celsius",fahrenheit:"Fahrenheit",
+    devices:"Apparaten",type:"Type",serial:"Serienummer",firmware:"Firmware",address:"Adres",controllable:"Bestuurbaar",
+    remote:"Toegang op afstand",back:"Terug",now:"Nu",more:"Meer parameters",targetTemp:"Streeftemperatuur",
+    fan:"Ventilator",waterEnergy:"Warm water",energySource:"Energiebron",gas:"Gas",electric:"Elektra",mix:"Mix",
+    electricLevel:"Elektra-niveau",hotWater:"Warm water",ambientLight:"Sfeerverlichting",
+    connecting:"verbinden",connected:"verbonden",preview:"voorbeelddata",offline:"offline",
+    noParams:"Nog geen parameters gevonden.",paramsCount:"{n} parameters in het systeem",
+    modes:["Uit","Auto","Koelen","Verwarmen","Verwarmen","Ventileren","Ontvochtigen"],
+    levels:{Off:"Uit",On:"Aan",Auto:"Auto",Low:"Laag",Mid:"Midden",High:"Hoog",Night:"Nacht",Eco:"Eco",Boost:"Boost",Comfort:"Comfort",Fast:"Snel"},
+    dtypes:{1:"Paneel",2:"Verwarming",3:"Airco",10:"Interface",11:"Connect",4:"Connect",9:"Gassensor",0:"Apparaat"},
+    remoteText:"Bereik <b>truma-x</b> overal veilig via je eigen privénetwerk (Tailscale/WireGuard) — geen poorten openzetten. Lokaal bereikbaar op <b>{host}</b>."},
+  de:{settings:"Einstellungen",language:"Sprache",unit:"Temperatureinheit",celsius:"Celsius",fahrenheit:"Fahrenheit",
+    devices:"Geräte",type:"Typ",serial:"Seriennummer",firmware:"Firmware",address:"Adresse",controllable:"Steuerbar",
+    remote:"Fernzugriff",back:"Zurück",now:"Jetzt",more:"Weitere Parameter",targetTemp:"Zieltemperatur",
+    fan:"Lüfter",waterEnergy:"Warmwasser",energySource:"Energiequelle",gas:"Gas",electric:"Elektro",mix:"Mix",
+    electricLevel:"Elektro-Stufe",hotWater:"Warmwasser",ambientLight:"Ambientelicht",
+    connecting:"verbinde",connected:"verbunden",preview:"Vorschaudaten",offline:"offline",
+    noParams:"Noch keine Parameter gefunden.",paramsCount:"{n} Parameter im System",
+    modes:["Aus","Auto","Kühlen","Heizen","Heizen","Lüften","Entfeuchten"],
+    levels:{Off:"Aus",On:"An",Auto:"Auto",Low:"Niedrig",Mid:"Mittel",High:"Hoch",Night:"Nacht",Eco:"Eco",Boost:"Boost",Comfort:"Komfort",Fast:"Schnell"},
+    dtypes:{1:"Panel",2:"Heizung",3:"Klimaanlage",10:"Schnittstelle",11:"Connect",4:"Connect",9:"Gassensor",0:"Gerät"},
+    remoteText:"Erreiche <b>truma-x</b> überall sicher über dein privates Netzwerk (Tailscale/WireGuard) — ohne Portfreigabe. Lokal erreichbar unter <b>{host}</b>."},
+  en:{settings:"Settings",language:"Language",unit:"Temperature unit",celsius:"Celsius",fahrenheit:"Fahrenheit",
+    devices:"Devices",type:"Type",serial:"Serial number",firmware:"Firmware",address:"Address",controllable:"Controllable",
+    remote:"Remote access",back:"Back",now:"Now",more:"More parameters",targetTemp:"Target temperature",
+    fan:"Fan",waterEnergy:"Hot water",energySource:"Energy source",gas:"Gas",electric:"Electric",mix:"Mix",
+    electricLevel:"Electric level",hotWater:"Hot water",ambientLight:"Ambient light",
+    connecting:"connecting",connected:"connected",preview:"preview data",offline:"offline",
+    noParams:"No parameters discovered yet.",paramsCount:"{n} parameters across the system",
+    modes:["Off","Auto","Cool","Heat","Heat","Fan","Dry"],
+    levels:{Off:"Off",On:"On",Auto:"Auto",Low:"Low",Mid:"Mid",High:"High",Night:"Night",Eco:"Eco",Boost:"Boost",Comfort:"Comfort",Fast:"Fast"},
+    dtypes:{1:"Panel",2:"Heater",3:"Air conditioner",10:"Interface",11:"Connect",4:"Connect",9:"Gas sensor",0:"Device"},
+    remoteText:"Reach <b>truma-x</b> from anywhere securely over your private network (Tailscale/WireGuard) — no port forwarding. Local address: <b>{host}</b>."},
+  fr:{settings:"Réglages",language:"Langue",unit:"Unité de température",celsius:"Celsius",fahrenheit:"Fahrenheit",
+    devices:"Appareils",type:"Type",serial:"Numéro de série",firmware:"Firmware",address:"Adresse",controllable:"Contrôlable",
+    remote:"Accès à distance",back:"Retour",now:"Actuel",more:"Plus de paramètres",targetTemp:"Température cible",
+    fan:"Ventilateur",waterEnergy:"Eau chaude",energySource:"Source d'énergie",gas:"Gaz",electric:"Électrique",mix:"Mixte",
+    electricLevel:"Niveau électrique",hotWater:"Eau chaude",ambientLight:"Éclairage d'ambiance",
+    connecting:"connexion",connected:"connecté",preview:"données d'aperçu",offline:"hors ligne",
+    noParams:"Aucun paramètre détecté.",paramsCount:"{n} paramètres dans le système",
+    modes:["Arrêt","Auto","Froid","Chaud","Chaud","Ventilation","Déshum."],
+    levels:{Off:"Arrêt",On:"Marche",Auto:"Auto",Low:"Bas",Mid:"Moyen",High:"Élevé",Night:"Nuit",Eco:"Éco",Boost:"Boost",Comfort:"Confort",Fast:"Rapide"},
+    dtypes:{1:"Panneau",2:"Chauffage",3:"Climatiseur",10:"Interface",11:"Connect",4:"Connect",9:"Capteur de gaz",0:"Appareil"},
+    remoteText:"Accédez à <b>truma-x</b> partout en toute sécurité via votre réseau privé (Tailscale/WireGuard) — sans ouverture de port. Adresse locale : <b>{host}</b>."},
+  it:{settings:"Impostazioni",language:"Lingua",unit:"Unità di temperatura",celsius:"Celsius",fahrenheit:"Fahrenheit",
+    devices:"Dispositivi",type:"Tipo",serial:"Numero di serie",firmware:"Firmware",address:"Indirizzo",controllable:"Controllabile",
+    remote:"Accesso remoto",back:"Indietro",now:"Ora",more:"Altri parametri",targetTemp:"Temperatura obiettivo",
+    fan:"Ventola",waterEnergy:"Acqua calda",energySource:"Fonte di energia",gas:"Gas",electric:"Elettrico",mix:"Misto",
+    electricLevel:"Livello elettrico",hotWater:"Acqua calda",ambientLight:"Luce d'ambiente",
+    connecting:"connessione",connected:"connesso",preview:"dati di anteprima",offline:"offline",
+    noParams:"Nessun parametro rilevato.",paramsCount:"{n} parametri nel sistema",
+    modes:["Spento","Auto","Raffredda","Riscalda","Riscalda","Ventilazione","Deumidifica"],
+    levels:{Off:"Spento",On:"Acceso",Auto:"Auto",Low:"Bassa",Mid:"Media",High:"Alta",Night:"Notte",Eco:"Eco",Boost:"Boost",Comfort:"Comfort",Fast:"Rapido"},
+    dtypes:{1:"Pannello",2:"Riscaldamento",3:"Climatizzatore",10:"Interfaccia",11:"Connect",4:"Connect",9:"Sensore gas",0:"Dispositivo"},
+    remoteText:"Raggiungi <b>truma-x</b> ovunque in modo sicuro tramite la tua rete privata (Tailscale/WireGuard) — senza aprire porte. Indirizzo locale: <b>{host}</b>."},
+  es:{settings:"Ajustes",language:"Idioma",unit:"Unidad de temperatura",celsius:"Celsius",fahrenheit:"Fahrenheit",
+    devices:"Dispositivos",type:"Tipo",serial:"Número de serie",firmware:"Firmware",address:"Dirección",controllable:"Controlable",
+    remote:"Acceso remoto",back:"Atrás",now:"Ahora",more:"Más parámetros",targetTemp:"Temperatura objetivo",
+    fan:"Ventilador",waterEnergy:"Agua caliente",energySource:"Fuente de energía",gas:"Gas",electric:"Eléctrico",mix:"Mixto",
+    electricLevel:"Nivel eléctrico",hotWater:"Agua caliente",ambientLight:"Luz ambiental",
+    connecting:"conectando",connected:"conectado",preview:"datos de vista previa",offline:"sin conexión",
+    noParams:"No se detectaron parámetros.",paramsCount:"{n} parámetros en el sistema",
+    modes:["Apagado","Auto","Frío","Calor","Calor","Ventilación","Deshum."],
+    levels:{Off:"Apagado",On:"Encendido",Auto:"Auto",Low:"Baja",Mid:"Media",High:"Alta",Night:"Noche",Eco:"Eco",Boost:"Boost",Comfort:"Confort",Fast:"Rápido"},
+    dtypes:{1:"Panel",2:"Calefacción",3:"Aire acondicionado",10:"Interfaz",11:"Connect",4:"Connect",9:"Sensor de gas",0:"Dispositivo"},
+    remoteText:"Accede a <b>truma-x</b> desde cualquier lugar de forma segura por tu red privada (Tailscale/WireGuard) — sin abrir puertos. Dirección local: <b>{host}</b>."}
+};
+
+const SEC_T={
+  nl:{security:"Beveiliging",requirePw:"Wachtwoord vereisen",accessToken:"Toegangscode",save:"Opslaan",https:"HTTPS (TLS)",restartNote:"HTTPS gaat in na een herstart van het apparaat.",unlock:"Ontgrendelen",wrongToken:"Onjuiste toegangscode"},
+  de:{security:"Sicherheit",requirePw:"Passwort verlangen",accessToken:"Zugangscode",save:"Speichern",https:"HTTPS (TLS)",restartNote:"HTTPS wird nach einem Neustart aktiv.",unlock:"Entsperren",wrongToken:"Falscher Zugangscode"},
+  en:{security:"Security",requirePw:"Require password",accessToken:"Access token",save:"Save",https:"HTTPS (TLS)",restartNote:"HTTPS takes effect after a device restart.",unlock:"Unlock",wrongToken:"Wrong token"},
+  fr:{security:"Sécurité",requirePw:"Exiger un mot de passe",accessToken:"Code d'accès",save:"Enregistrer",https:"HTTPS (TLS)",restartNote:"HTTPS s'applique après un redémarrage de l'appareil.",unlock:"Déverrouiller",wrongToken:"Code incorrect"},
+  it:{security:"Sicurezza",requirePw:"Richiedi password",accessToken:"Codice di accesso",save:"Salva",https:"HTTPS (TLS)",restartNote:"HTTPS ha effetto dopo il riavvio del dispositivo.",unlock:"Sblocca",wrongToken:"Codice errato"},
+  es:{security:"Seguridad",requirePw:"Requerir contraseña",accessToken:"Código de acceso",save:"Guardar",https:"HTTPS (TLS)",restartNote:"HTTPS se aplica tras reiniciar el dispositivo.",unlock:"Desbloquear",wrongToken:"Código incorrecto"}
+};
+for(const k in SEC_T) Object.assign(T[k],SEC_T[k]);
+
+const EXT_T={
+  nl:{status:"Status",gasLevel:"Gas",freshWater:"Verswater",greyWater:"Grijswater",battery:"Accu",timers:"Timers",display:"Weergave",brightness:"Helderheid"},
+  de:{status:"Status",gasLevel:"Gas",freshWater:"Frischwasser",greyWater:"Grauwasser",battery:"Batterie",timers:"Timer",display:"Anzeige",brightness:"Helligkeit"},
+  en:{status:"Status",gasLevel:"Gas",freshWater:"Fresh water",greyWater:"Grey water",battery:"Battery",timers:"Timers",display:"Display",brightness:"Brightness"},
+  fr:{status:"État",gasLevel:"Gaz",freshWater:"Eau propre",greyWater:"Eaux grises",battery:"Batterie",timers:"Minuteries",display:"Affichage",brightness:"Luminosité"},
+  it:{status:"Stato",gasLevel:"Gas",freshWater:"Acqua pulita",greyWater:"Acque grigie",battery:"Batteria",timers:"Timer",display:"Display",brightness:"Luminosità"},
+  es:{status:"Estado",gasLevel:"Gas",freshWater:"Agua limpia",greyWater:"Aguas grises",battery:"Batería",timers:"Temporizadores",display:"Pantalla",brightness:"Brillo"}
+};
+for(const k in EXT_T) Object.assign(T[k],EXT_T[k]);
+
+const RM_T={
+  nl:{rmEnable:"Toegang op afstand",rmOff:"Uit. Zet aan om via een link of QR-code van overal te bedienen.",rmConnecting:"Verbinden met broker…",rmConnectedTo:"Verbonden via {b}",
+    rmControl:"Bedien-link",rmView:"Kijk-link",rmCopy:"Kopiëren",rmCopied:"Gekopieerd",rmShare:"Delen",rmBrokers:"Brokers (volgorde = reserve)",rmCustom:"Eigen broker (wss://)",
+    rmNot443:"niet op 443-only campings",rmPortWarn:"Andere poort dan 443: werkt niet op campings die alleen 80 en 443 toestaan.",rmNew:"Nieuwe link maken",
+    rmNewConfirm:"Alle oude links, ook op andere telefoons, werken daarna niet meer. Doorgaan?",rmNoQr:"(QR-code niet beschikbaar: pip3 install qrcode)",
+    rmNote:"De sleutel staat alleen in de link en op dit apparaat; brokers zien alleen versleutelde data. Wie de bedien-link heeft, kan bedienen: deel hem alleen met wie dat mag. Tip: open de link op je telefoon en kies Delen → Zet op beginscherm.",
+    rmBarOn:"Op afstand · {b}",rmBarView:"alleen kijken",rmBarWait:"Wachten op de caravan…",rmBarOffline:"Caravan offline sinds {t} · laatst bekende waarden",
+    rmBarNoBroker:"Geen broker bereikbaar · opnieuw proberen…",rmBarUpdEsp:"De ESP draait een oudere versie: update je ESP.",rmBarUpdApp:"De ESP is nieuwer: ververs de app.",
+    rmBarErr:"Toegang op afstand werkt niet in deze browser.",rmLocal:"Lokaal openen",rmCmdFail:"Opdracht niet aangekomen, probeer het opnieuw.",
+    rmViewOnly:"Kijk-link: bedienen kan hiermee niet.",rmForget:"Link vergeten op dit toestel",
+    rmRemoteInfo:"Je bedient truma-x op afstand ({kind}). Netwerk, Bluetooth, firmware en beveiliging stel je in op de pagina van de ESP zelf: <b>{local}</b>."},
+  en:{rmEnable:"Remote access",rmOff:"Off. Switch on to control from anywhere via a link or QR code.",rmConnecting:"Connecting to broker…",rmConnectedTo:"Connected via {b}",
+    rmControl:"Control link",rmView:"View link",rmCopy:"Copy",rmCopied:"Copied",rmShare:"Share",rmBrokers:"Brokers (order = fallback)",rmCustom:"Own broker (wss://)",
+    rmNot443:"not on 443-only campsites",rmPortWarn:"Port other than 443: won't work on campsites that only allow 80 and 443.",rmNew:"Make new link",
+    rmNewConfirm:"All old links, including on other phones, will stop working. Continue?",rmNoQr:"(QR code unavailable: pip3 install qrcode)",
+    rmNote:"The key lives only in the link and on this device; brokers only see encrypted data. Whoever has the control link can operate the heater: share it only with people who may. Tip: open the link on your phone and choose Share → Add to Home Screen.",
+    rmBarOn:"Remote · {b}",rmBarView:"view only",rmBarWait:"Waiting for the caravan…",rmBarOffline:"Caravan offline since {t} · last known values",
+    rmBarNoBroker:"No broker reachable · retrying…",rmBarUpdEsp:"The ESP runs an older version: update your ESP.",rmBarUpdApp:"The ESP is newer: refresh the app.",
+    rmBarErr:"Remote access doesn't work in this browser.",rmLocal:"Open locally",rmCmdFail:"Command didn't arrive, please try again.",
+    rmViewOnly:"View link: it can't operate anything.",rmForget:"Forget link on this device",
+    rmRemoteInfo:"You are controlling truma-x remotely ({kind}). Network, Bluetooth, firmware and security are set on the ESP's own page: <b>{local}</b>."},
+  de:{rmEnable:"Fernzugriff",rmOff:"Aus. Einschalten, um per Link oder QR-Code von überall zu steuern.",rmConnecting:"Verbinde mit Broker…",rmConnectedTo:"Verbunden über {b}",
+    rmControl:"Steuer-Link",rmView:"Ansichts-Link",rmCopy:"Kopieren",rmCopied:"Kopiert",rmShare:"Teilen",rmBrokers:"Broker (Reihenfolge = Reserve)",rmCustom:"Eigener Broker (wss://)",
+    rmNot443:"nicht auf Plätzen nur mit 443",rmPortWarn:"Anderer Port als 443: funktioniert nicht auf Plätzen, die nur 80 und 443 erlauben.",rmNew:"Neuen Link erstellen",
+    rmNewConfirm:"Alle alten Links, auch auf anderen Handys, funktionieren danach nicht mehr. Fortfahren?",rmNoQr:"(QR-Code nicht verfügbar: pip3 install qrcode)",
+    rmNote:"Der Schlüssel steht nur im Link und auf diesem Gerät; Broker sehen nur verschlüsselte Daten. Wer den Steuer-Link hat, kann steuern: nur mit Berechtigten teilen. Tipp: Link am Handy öffnen und Teilen → Zum Home-Bildschirm wählen.",
+    rmBarOn:"Fernzugriff · {b}",rmBarView:"nur ansehen",rmBarWait:"Warte auf den Wohnwagen…",rmBarOffline:"Wohnwagen offline seit {t} · letzte bekannte Werte",
+    rmBarNoBroker:"Kein Broker erreichbar · neuer Versuch…",rmBarUpdEsp:"Der ESP hat eine ältere Version: ESP aktualisieren.",rmBarUpdApp:"Der ESP ist neuer: App neu laden.",
+    rmBarErr:"Fernzugriff funktioniert in diesem Browser nicht.",rmLocal:"Lokal öffnen",rmCmdFail:"Befehl nicht angekommen, bitte erneut versuchen.",
+    rmViewOnly:"Ansichts-Link: damit lässt sich nichts steuern.",rmForget:"Link auf diesem Gerät vergessen",
+    rmRemoteInfo:"Du steuerst truma-x aus der Ferne ({kind}). Netzwerk, Bluetooth, Firmware und Sicherheit stellst du auf der Seite des ESP ein: <b>{local}</b>."},
+  fr:{rmEnable:"Accès à distance",rmOff:"Désactivé. Activez-le pour piloter de partout via un lien ou un QR code.",rmConnecting:"Connexion au broker…",rmConnectedTo:"Connecté via {b}",
+    rmControl:"Lien de commande",rmView:"Lien de lecture",rmCopy:"Copier",rmCopied:"Copié",rmShare:"Partager",rmBrokers:"Brokers (ordre = secours)",rmCustom:"Broker perso (wss://)",
+    rmNot443:"pas sur les campings 443 uniquement",rmPortWarn:"Port autre que 443 : ne marche pas sur les campings qui n'autorisent que 80 et 443.",rmNew:"Créer un nouveau lien",
+    rmNewConfirm:"Tous les anciens liens, y compris sur d'autres téléphones, cesseront de fonctionner. Continuer ?",rmNoQr:"(QR code indisponible : pip3 install qrcode)",
+    rmNote:"La clé n'existe que dans le lien et sur cet appareil ; les brokers ne voient que des données chiffrées. Qui a le lien de commande peut piloter : ne le partagez qu'avec des personnes autorisées.",
+    rmBarOn:"À distance · {b}",rmBarView:"lecture seule",rmBarWait:"En attente de la caravane…",rmBarOffline:"Caravane hors ligne depuis {t} · dernières valeurs",
+    rmBarNoBroker:"Aucun broker joignable · nouvel essai…",rmBarUpdEsp:"L'ESP a une version plus ancienne : mettez l'ESP à jour.",rmBarUpdApp:"L'ESP est plus récent : rechargez l'app.",
+    rmBarErr:"L'accès à distance ne fonctionne pas dans ce navigateur.",rmLocal:"Ouvrir en local",rmCmdFail:"Commande non reçue, réessayez.",
+    rmViewOnly:"Lien de lecture : il ne permet pas de piloter.",rmForget:"Oublier le lien sur cet appareil",
+    rmRemoteInfo:"Vous pilotez truma-x à distance ({kind}). Réseau, Bluetooth, firmware et sécurité se règlent sur la page de l'ESP : <b>{local}</b>."},
+  it:{rmEnable:"Accesso remoto",rmOff:"Spento. Attivalo per comandare ovunque tramite link o QR code.",rmConnecting:"Connessione al broker…",rmConnectedTo:"Connesso via {b}",
+    rmControl:"Link di comando",rmView:"Link di sola lettura",rmCopy:"Copia",rmCopied:"Copiato",rmShare:"Condividi",rmBrokers:"Broker (ordine = riserva)",rmCustom:"Broker proprio (wss://)",
+    rmNot443:"non nei campeggi solo 443",rmPortWarn:"Porta diversa da 443: non funziona nei campeggi che permettono solo 80 e 443.",rmNew:"Crea nuovo link",
+    rmNewConfirm:"Tutti i vecchi link, anche su altri telefoni, smetteranno di funzionare. Continuare?",rmNoQr:"(QR code non disponibile: pip3 install qrcode)",
+    rmNote:"La chiave esiste solo nel link e su questo dispositivo; i broker vedono solo dati cifrati. Chi ha il link di comando può comandare: condividilo solo con chi è autorizzato.",
+    rmBarOn:"Remoto · {b}",rmBarView:"sola lettura",rmBarWait:"In attesa del caravan…",rmBarOffline:"Caravan offline dalle {t} · ultimi valori noti",
+    rmBarNoBroker:"Nessun broker raggiungibile · nuovo tentativo…",rmBarUpdEsp:"L'ESP ha una versione più vecchia: aggiorna l'ESP.",rmBarUpdApp:"L'ESP è più recente: ricarica l'app.",
+    rmBarErr:"L'accesso remoto non funziona in questo browser.",rmLocal:"Apri in locale",rmCmdFail:"Comando non arrivato, riprova.",
+    rmViewOnly:"Link di sola lettura: non può comandare.",rmForget:"Dimentica il link su questo dispositivo",
+    rmRemoteInfo:"Stai comandando truma-x da remoto ({kind}). Rete, Bluetooth, firmware e sicurezza si impostano sulla pagina dell'ESP: <b>{local}</b>."},
+  es:{rmEnable:"Acceso remoto",rmOff:"Apagado. Actívalo para controlar desde cualquier lugar con un enlace o código QR.",rmConnecting:"Conectando al broker…",rmConnectedTo:"Conectado vía {b}",
+    rmControl:"Enlace de control",rmView:"Enlace de solo lectura",rmCopy:"Copiar",rmCopied:"Copiado",rmShare:"Compartir",rmBrokers:"Brokers (orden = reserva)",rmCustom:"Broker propio (wss://)",
+    rmNot443:"no en campings solo 443",rmPortWarn:"Puerto distinto de 443: no funciona en campings que solo permiten 80 y 443.",rmNew:"Crear enlace nuevo",
+    rmNewConfirm:"Todos los enlaces antiguos, también en otros teléfonos, dejarán de funcionar. ¿Continuar?",rmNoQr:"(código QR no disponible: pip3 install qrcode)",
+    rmNote:"La clave solo está en el enlace y en este dispositivo; los brokers solo ven datos cifrados. Quien tenga el enlace de control puede controlar: compártelo solo con quien deba.",
+    rmBarOn:"Remoto · {b}",rmBarView:"solo lectura",rmBarWait:"Esperando a la caravana…",rmBarOffline:"Caravana sin conexión desde las {t} · últimos valores",
+    rmBarNoBroker:"Ningún broker disponible · reintentando…",rmBarUpdEsp:"El ESP tiene una versión anterior: actualiza el ESP.",rmBarUpdApp:"El ESP es más nuevo: recarga la app.",
+    rmBarErr:"El acceso remoto no funciona en este navegador.",rmLocal:"Abrir en local",rmCmdFail:"La orden no llegó, inténtalo de nuevo.",
+    rmViewOnly:"Enlace de solo lectura: no puede controlar.",rmForget:"Olvidar el enlace en este dispositivo",
+    rmRemoteInfo:"Controlas truma-x a distancia ({kind}). Red, Bluetooth, firmware y seguridad se ajustan en la página del ESP: <b>{local}</b>."}
+};
+for(const k in RM_T) Object.assign(T[k],RM_T[k]);
+
+const LOGIN_T={
+  nl:{loginTitle:"Vergrendeld",loginDesc:"Voer je toegangscode in om verder te gaan."},
+  de:{loginTitle:"Gesperrt",loginDesc:"Gib deinen Zugangscode ein, um fortzufahren."},
+  en:{loginTitle:"Locked",loginDesc:"Enter your access token to continue."},
+  fr:{loginTitle:"Verrouillé",loginDesc:"Saisissez votre code d'accès pour continuer."},
+  it:{loginTitle:"Bloccato",loginDesc:"Inserisci il codice di accesso per continuare."},
+  es:{loginTitle:"Bloqueado",loginDesc:"Introduce tu código de acceso para continuar."}
+};
+for(const k in LOGIN_T) Object.assign(T[k],LOGIN_T[k]);
+
+const NOTIF_T={
+  nl:{notifications:"Meldingen",enableNotify:"Telefoon-push inschakelen",webhook:"Webhook / ntfy URL",lowGasThr:"Gas laag onder",lowWaterThr:"Verswater laag onder",highGreyThr:"Grijswater vol boven",low:"laag",full:"vol",active:"actief"},
+  de:{notifications:"Benachrichtigungen",enableNotify:"Telefon-Push aktivieren",webhook:"Webhook / ntfy URL",lowGasThr:"Gas niedrig unter",lowWaterThr:"Frischwasser niedrig unter",highGreyThr:"Grauwasser voll über",low:"niedrig",full:"voll",active:"aktiv"},
+  en:{notifications:"Notifications",enableNotify:"Enable phone push",webhook:"Webhook / ntfy URL",lowGasThr:"Gas low below",lowWaterThr:"Fresh water low below",highGreyThr:"Grey water full above",low:"low",full:"full",active:"active"},
+  fr:{notifications:"Notifications",enableNotify:"Activer la notification push",webhook:"Webhook / URL ntfy",lowGasThr:"Gaz bas sous",lowWaterThr:"Eau propre basse sous",highGreyThr:"Eaux grises pleines au-dessus",low:"bas",full:"plein",active:"actif"},
+  it:{notifications:"Notifiche",enableNotify:"Attiva push su telefono",webhook:"Webhook / URL ntfy",lowGasThr:"Gas basso sotto",lowWaterThr:"Acqua pulita bassa sotto",highGreyThr:"Acque grigie piene oltre",low:"basso",full:"pieno",active:"attiva"},
+  es:{notifications:"Notificaciones",enableNotify:"Activar push al teléfono",webhook:"Webhook / URL ntfy",lowGasThr:"Gas bajo por debajo",lowWaterThr:"Agua limpia baja por debajo",highGreyThr:"Aguas grises llenas por encima",low:"bajo",full:"lleno",active:"activa"}
+};
+for(const k in NOTIF_T) Object.assign(T[k],NOTIF_T[k]);
+
+const TIMER_T={
+  nl:{addTimer:"Timer toevoegen",del:"Verwijderen",start:"Start",end:"Einde",target:"Doeltemperatuur"},
+  de:{addTimer:"Timer hinzufügen",del:"Löschen",start:"Start",end:"Ende",target:"Zieltemperatur"},
+  en:{addTimer:"Add timer",del:"Delete",start:"Start",end:"End",target:"Target temperature"},
+  fr:{addTimer:"Ajouter une minuterie",del:"Supprimer",start:"Début",end:"Fin",target:"Température cible"},
+  it:{addTimer:"Aggiungi timer",del:"Elimina",start:"Inizio",end:"Fine",target:"Temperatura obiettivo"},
+  es:{addTimer:"Añadir temporizador",del:"Eliminar",start:"Inicio",end:"Fin",target:"Temperatura objetivo"}
+};
+for(const k in TIMER_T) Object.assign(T[k],TIMER_T[k]);
+
+const SCALE_T={
+  nl:{gasBottle:"Gasfles",fullGas:"Volle gasinhoud (kg)"},
+  de:{gasBottle:"Gasflasche",fullGas:"Gasfüllung voll (kg)"},
+  en:{gasBottle:"Gas bottle",fullGas:"Full gas contents (kg)"},
+  fr:{gasBottle:"Bouteille de gaz",fullGas:"Contenu plein (kg)"},
+  it:{gasBottle:"Bombola gas",fullGas:"Contenuto pieno (kg)"},
+  es:{gasBottle:"Bombona de gas",fullGas:"Contenido lleno (kg)"}
+};
+for(const k in SCALE_T) Object.assign(T[k],SCALE_T[k]);
+
+const OTA_T={
+  nl:{firmwareUpdate:"Firmware-update",version:"Versie",update:"Bijwerken",updating:"Bezig met updaten…",rebooting:"Opnieuw opstarten…",zero:"Nul"},
+  de:{firmwareUpdate:"Firmware-Update",version:"Version",update:"Aktualisieren",updating:"Aktualisiere…",rebooting:"Neustart…",zero:"Null"},
+  en:{firmwareUpdate:"Firmware update",version:"Version",update:"Update",updating:"Updating…",rebooting:"Rebooting…",zero:"Zero"},
+  fr:{firmwareUpdate:"Mise à jour firmware",version:"Version",update:"Mettre à jour",updating:"Mise à jour…",rebooting:"Redémarrage…",zero:"Zéro"},
+  it:{firmwareUpdate:"Aggiornamento firmware",version:"Versione",update:"Aggiorna",updating:"Aggiornamento…",rebooting:"Riavvio…",zero:"Zero"},
+  es:{firmwareUpdate:"Actualización de firmware",version:"Versión",update:"Actualizar",updating:"Actualizando…",rebooting:"Reiniciando…",zero:"Cero"}
+};
+for(const k in OTA_T) Object.assign(T[k],OTA_T[k]);
+
+const SRC_T={
+  nl:{source:"Meetbron",hx711:"HX711 load cell",senso4s:"GOK Senso4s (BLE)",sourceOff:"Uit"},
+  de:{source:"Messquelle",hx711:"HX711 Wägezelle",senso4s:"GOK Senso4s (BLE)",sourceOff:"Aus"},
+  en:{source:"Source",hx711:"HX711 load cell",senso4s:"GOK Senso4s (BLE)",sourceOff:"Off"},
+  fr:{source:"Source",hx711:"Cellule HX711",senso4s:"GOK Senso4s (BLE)",sourceOff:"Arrêt"},
+  it:{source:"Sorgente",hx711:"Cella di carico HX711",senso4s:"GOK Senso4s (BLE)",sourceOff:"Spento"},
+  es:{source:"Fuente",hx711:"Célula de carga HX711",senso4s:"GOK Senso4s (BLE)",sourceOff:"Apagado"}
+};
+for(const k in SRC_T) Object.assign(T[k],SRC_T[k]);
+
+const UPD_T={
+  nl:{repo:"GitHub-repo (owner/naam)",autoUpdate:"Automatisch updaten",checkNow:"Nu controleren",updateNow:"Nu updaten",upToDate:"Up-to-date",updateAvailable:"Update beschikbaar:",manualUpload:"Handmatig bestand uploaden",checking:"Controleren…"},
+  de:{repo:"GitHub-Repo (Owner/Name)",autoUpdate:"Automatisch aktualisieren",checkNow:"Jetzt prüfen",updateNow:"Jetzt aktualisieren",upToDate:"Aktuell",updateAvailable:"Update verfügbar:",manualUpload:"Datei manuell hochladen",checking:"Prüfe…"},
+  en:{repo:"GitHub repo (owner/name)",autoUpdate:"Auto-update",checkNow:"Check now",updateNow:"Update now",upToDate:"Up to date",updateAvailable:"Update available:",manualUpload:"Upload file manually",checking:"Checking…"},
+  fr:{repo:"Dépôt GitHub (owner/nom)",autoUpdate:"Mise à jour auto",checkNow:"Vérifier",updateNow:"Mettre à jour",upToDate:"À jour",updateAvailable:"Mise à jour disponible :",manualUpload:"Téléverser un fichier",checking:"Vérification…"},
+  it:{repo:"Repo GitHub (owner/nome)",autoUpdate:"Aggiornamento automatico",checkNow:"Controlla ora",updateNow:"Aggiorna ora",upToDate:"Aggiornato",updateAvailable:"Aggiornamento disponibile:",manualUpload:"Carica file manualmente",checking:"Controllo…"},
+  es:{repo:"Repo de GitHub (owner/nombre)",autoUpdate:"Actualización automática",checkNow:"Comprobar ahora",updateNow:"Actualizar ahora",upToDate:"Actualizado",updateAvailable:"Actualización disponible:",manualUpload:"Subir archivo manualmente",checking:"Comprobando…"}
+};
+for(const k in UPD_T) Object.assign(T[k],UPD_T[k]);
+
+const BLENAME_T={
+  nl:{bleName:"Naam in het paneel",bleNameHint:"Zo staat deze verbinding in de lijst van het iNet X-paneel, in plaats van een MAC-adres."},
+  de:{bleName:"Name im Panel",bleNameHint:"So erscheint diese Verbindung in der Liste des iNet X Panels statt als MAC-Adresse."},
+  en:{bleName:"Name shown on the panel",bleNameHint:"How this connection appears in the iNet X panel's list, instead of a MAC address."},
+  fr:{bleName:"Nom affiché sur le panneau",bleNameHint:"Nom de cette connexion dans la liste du panneau iNet X, au lieu d'une adresse MAC."},
+  it:{bleName:"Nome sul pannello",bleNameHint:"Come appare questa connessione nell'elenco del pannello iNet X, invece di un indirizzo MAC."},
+  es:{bleName:"Nombre en el panel",bleNameHint:"Cómo aparece esta conexión en la lista del panel iNet X, en lugar de una dirección MAC."}};
+for(const k in BLENAME_T) Object.assign(T[k],BLENAME_T[k]);
+let BLENAME="truma-x";
+const HW_T={
+  nl:{waterTemp:"Temperatuur",heatMode:"Verwarmingsstand",noneActive:"Geen actief",climateTile:"Klimaat-tegel toont",setpoint:"Ingestelde temperatuur",actual:"Actuele temperatuur",target:"doel",heatingUp:"Opwarmen",waterReady:"Op temperatuur"},
+  de:{waterTemp:"Temperatur",heatMode:"Heizstufe",noneActive:"Keiner aktiv",climateTile:"Klima-Kachel zeigt",setpoint:"Solltemperatur",actual:"Isttemperatur",target:"Soll",heatingUp:"Heizt auf",waterReady:"Auf Temperatur"},
+  en:{waterTemp:"Temperature",heatMode:"Heating mode",noneActive:"None active",climateTile:"Climate tile shows",setpoint:"Set temperature",actual:"Actual temperature",target:"target",heatingUp:"Heating up",waterReady:"At temperature"},
+  fr:{waterTemp:"Température",heatMode:"Mode de chauffage",noneActive:"Aucune active",climateTile:"La tuile climat affiche",setpoint:"Température réglée",actual:"Température actuelle",target:"cible",heatingUp:"Chauffe",waterReady:"À température"},
+  it:{waterTemp:"Temperatura",heatMode:"Modalità riscaldamento",noneActive:"Nessuno attivo",climateTile:"Il riquadro clima mostra",setpoint:"Temperatura impostata",actual:"Temperatura attuale",target:"obiettivo",heatingUp:"Riscaldamento",waterReady:"In temperatura"},
+  es:{waterTemp:"Temperatura",heatMode:"Modo de calefacción",noneActive:"Ninguno activo",climateTile:"El mosaico clima muestra",setpoint:"Temperatura ajustada",actual:"Temperatura actual",target:"objetivo",heatingUp:"Calentando",waterReady:"A temperatura"}};
+for(const k in HW_T) Object.assign(T[k],HW_T[k]);
+const MAN_T={nl:{manifest:"Manifest-URL (.bin-map)"},de:{manifest:"Manifest-URL"},en:{manifest:"Manifest URL"},fr:{manifest:"URL du manifeste"},it:{manifest:"URL manifest"},es:{manifest:"URL del manifiesto"}};
+for(const k in MAN_T) Object.assign(T[k],MAN_T[k]);
+
+const HOME_T={nl:{climate:"Klimaat"},de:{climate:"Klima"},en:{climate:"Climate"},fr:{climate:"Climat"},it:{climate:"Clima"},es:{climate:"Clima"}};
+for(const k in HOME_T) Object.assign(T[k],HOME_T[k]);
+
+const OV_T={
+  nl:{overview:"Overzicht-tegels",statusTile:"Status-tegel toont",gasTile:"Gas-tegel toont",gasTotal:"Gas totaal"},
+  de:{overview:"Übersichts-Kacheln",statusTile:"Status-Kachel zeigt",gasTile:"Gas-Kachel zeigt",gasTotal:"Gas gesamt"},
+  en:{overview:"Overview tiles",statusTile:"Status tile shows",gasTile:"Gas tile shows",gasTotal:"Gas total"},
+  fr:{overview:"Tuiles d'aperçu",statusTile:"La tuile Statut affiche",gasTile:"La tuile Gaz affiche",gasTotal:"Gaz total"},
+  it:{overview:"Riquadri panoramica",statusTile:"Il riquadro Stato mostra",gasTile:"Il riquadro Gas mostra",gasTotal:"Gas totale"},
+  es:{overview:"Mosaicos de resumen",statusTile:"El mosaico Estado muestra",gasTile:"El mosaico Gas muestra",gasTotal:"Gas total"}
+};
+for(const k in OV_T) Object.assign(T[k],OV_T[k]);
+
+const HIST_T={
+  nl:{emptyIn:"leeg over ~{n} d"},de:{emptyIn:"leer in ~{n} T"},en:{emptyIn:"empty in ~{n}d"},
+  fr:{emptyIn:"vide dans ~{n}j"},it:{emptyIn:"vuota tra ~{n}g"},es:{emptyIn:"vacío en ~{n}d"}
+};
+for(const k in HIST_T) Object.assign(T[k],HIST_T[k]);
+
+const HELP_T={
+  nl:{loginDesc:"Voer je toegangscode in om verder te gaan.",secHint:"Standaard uit. Zet aan en kies een code; tot je een code instelt blijf je toegankelijk."},
+  de:{loginDesc:"Gib deinen Zugangscode ein, um fortzufahren.",secHint:"Standardmäßig aus. Aktivieren und Code wählen; ohne Code bleibst du erreichbar."},
+  en:{loginDesc:"Enter your access code to continue.",secHint:"Off by default. Turn it on and set a code; until you set one, access stays open."},
+  fr:{loginDesc:"Saisissez votre code d'accès pour continuer.",secHint:"Désactivé par défaut. Activez-le et définissez un code ; sans code, l'accès reste ouvert."},
+  it:{loginDesc:"Inserisci il codice di accesso per continuare.",secHint:"Disattivato di default. Attivalo e imposta un codice; senza codice l'accesso resta aperto."},
+  es:{loginDesc:"Introduce tu código de acceso para continuar.",secHint:"Desactivado por defecto. Actívalo y define un código; sin código el acceso queda abierto."}
+};
+for(const k in HELP_T) Object.assign(T[k],HELP_T[k]);
+
+const NET_T={
+  nl:{connectivity:"Connectiviteit",wifiSsid:"Wifi-netwerk (SSID)",wifiPass:"Wifi-wachtwoord",apn:"APN (simkaart)",
+    modeWifi:"Alleen wifi",modeCell:"Alleen simkaart",modeAutoWifi:"Auto (wifi eerst)",modeAutoCell:"Auto (simkaart eerst)",
+    netSaved:"Opgeslagen — netwerk wordt opnieuw verbonden",wifiConnected:"Wifi verbonden",cellConnected:"Mobiel verbonden"},
+  de:{connectivity:"Konnektivität",wifiSsid:"WLAN-Netzwerk (SSID)",wifiPass:"WLAN-Passwort",apn:"APN (SIM-Karte)",
+    modeWifi:"Nur WLAN",modeCell:"Nur SIM-Karte",modeAutoWifi:"Auto (WLAN zuerst)",modeAutoCell:"Auto (SIM zuerst)",
+    netSaved:"Gespeichert — Netzwerk wird neu verbunden",wifiConnected:"WLAN verbunden",cellConnected:"Mobilfunk verbunden"},
+  en:{connectivity:"Connectivity",wifiSsid:"Wi-Fi network (SSID)",wifiPass:"Wi-Fi password",apn:"APN (SIM card)",
+    modeWifi:"Wi-Fi only",modeCell:"Cellular only",modeAutoWifi:"Auto (Wi-Fi first)",modeAutoCell:"Auto (cellular first)",
+    netSaved:"Saved — reconnecting network",wifiConnected:"Wi-Fi connected",cellConnected:"Cellular connected"},
+  fr:{connectivity:"Connectivité",wifiSsid:"Réseau Wi-Fi (SSID)",wifiPass:"Mot de passe Wi-Fi",apn:"APN (carte SIM)",
+    modeWifi:"Wi-Fi uniquement",modeCell:"Carte SIM uniquement",modeAutoWifi:"Auto (Wi-Fi d'abord)",modeAutoCell:"Auto (SIM d'abord)",
+    netSaved:"Enregistré — reconnexion du réseau",wifiConnected:"Wi-Fi connecté",cellConnected:"Mobile connecté"},
+  it:{connectivity:"Connettività",wifiSsid:"Rete Wi-Fi (SSID)",wifiPass:"Password Wi-Fi",apn:"APN (SIM)",
+    modeWifi:"Solo Wi-Fi",modeCell:"Solo SIM",modeAutoWifi:"Auto (prima Wi-Fi)",modeAutoCell:"Auto (prima SIM)",
+    netSaved:"Salvato — riconnessione rete",wifiConnected:"Wi-Fi connesso",cellConnected:"Rete mobile connessa"},
+  es:{connectivity:"Conectividad",wifiSsid:"Red Wi-Fi (SSID)",wifiPass:"Contraseña Wi-Fi",apn:"APN (tarjeta SIM)",
+    modeWifi:"Solo Wi-Fi",modeCell:"Solo SIM",modeAutoWifi:"Auto (Wi-Fi primero)",modeAutoCell:"Auto (SIM primero)",
+    netSaved:"Guardado — reconectando red",wifiConnected:"Wi-Fi conectado",cellConnected:"Móvil conectado"}
+};
+for(const k in NET_T) Object.assign(T[k],NET_T[k]);
+
+const BLE_T={
+  nl:{bluetooth:"Bluetooth",blePanel:"Truma-paneel",bleIdle:"niet verbonden",bleScanning:"zoeken…",bleConnecting:"verbinden…",blePaired:"gekoppeld",
+    bleScanBtn:"Zoek naar panelen",bleForgetBtn:"Ontkoppelen",bleNoneFound:"Nog geen panelen gevonden.",blePairBtn:"Koppel"},
+  de:{bluetooth:"Bluetooth",blePanel:"Truma-Panel",bleIdle:"nicht verbunden",bleScanning:"suche…",bleConnecting:"verbinde…",blePaired:"gekoppelt",
+    bleScanBtn:"Nach Panels suchen",bleForgetBtn:"Entkoppeln",bleNoneFound:"Noch keine Panels gefunden.",blePairBtn:"Koppeln"},
+  en:{bluetooth:"Bluetooth",blePanel:"Truma panel",bleIdle:"not connected",bleScanning:"scanning…",bleConnecting:"connecting…",blePaired:"paired",
+    bleScanBtn:"Scan for panels",bleForgetBtn:"Forget",bleNoneFound:"No panels found yet.",blePairBtn:"Pair"},
+  fr:{bluetooth:"Bluetooth",blePanel:"Panneau Truma",bleIdle:"non connecté",bleScanning:"recherche…",bleConnecting:"connexion…",blePaired:"couplé",
+    bleScanBtn:"Rechercher des panneaux",bleForgetBtn:"Oublier",bleNoneFound:"Aucun panneau trouvé.",blePairBtn:"Coupler"},
+  it:{bluetooth:"Bluetooth",blePanel:"Pannello Truma",bleIdle:"non connesso",bleScanning:"ricerca…",bleConnecting:"connessione…",blePaired:"accoppiato",
+    bleScanBtn:"Cerca pannelli",bleForgetBtn:"Dimentica",bleNoneFound:"Nessun pannello trovato.",blePairBtn:"Accoppia"},
+  es:{bluetooth:"Bluetooth",blePanel:"Panel Truma",bleIdle:"no conectado",bleScanning:"buscando…",bleConnecting:"conectando…",blePaired:"emparejado",
+    bleScanBtn:"Buscar paneles",bleForgetBtn:"Olvidar",bleNoneFound:"Aún no se encontraron paneles.",blePairBtn:"Emparejar"}
+};
+for(const k in BLE_T) Object.assign(T[k],BLE_T[k]);
+
+/* ---------- config (persisted) ---------- */
+const CFG = {lang:"nl", unit:"C"};
+try{ const s=JSON.parse(localStorage.getItem("trumax")||"{}"); if(s.lang)CFG.lang=s.lang; if(s.unit)CFG.unit=s.unit; }catch(e){}
+function saveCfg(){ try{ localStorage.setItem("trumax",JSON.stringify(CFG)); }catch(e){} }
+function L(){ return T[CFG.lang]||T.en; }
+function t(k,vars){ let s=L()[k]!=null?L()[k]:(T.en[k]!=null?T.en[k]:k);
+  if(vars) for(const key in vars) s=s.replace("{"+key+"}",vars[key]); return s; }
+function tLevel(name){ return (L().levels[name]!=null?L().levels[name]:name); }
+function tType(num){ const d=L().dtypes; return d[num]!=null?d[num]:d[0]; }
+
+/* ---------- formatting ---------- */
+const isComma = ()=> CFG.lang!=="en";
+function num1(x){ let s=x.toFixed(1); if(isComma()) s=s.replace(".",","); return s; }
+function tempFrom(tenths){ const c=tenths/10; return CFG.unit==="F" ? c*9/5+32 : c; }
+function unitStr(){ return CFG.unit==="F"?"°F":"°C"; }
+function fmtTemp(tenths,withUnit){ const s=num1(tempFrom(tenths)); return withUnit? s+" "+unitStr() : s; }
+function isTempParam(p){ return (p.topic&&(p.topic.startsWith("Air")||p.topic==="RoomClimate"||p.topic==="Temperature")) && /Temp/.test(p.param); }
+function prettify(s){ return s.replace(/([a-z0-9])([A-Z])/g,"$1 $2").replace(/^./,c=>c.toUpperCase()); }
+
+/* ---------- modes ---------- */
+const MODE={0:{k:0,a:"#6b7a8d",i:'<path d="M12 4v8"/><path d="M6.3 7.3a8 8 0 1 0 11.4 0"/>'},
+  1:{k:1,a:"#35c2b1",i:'<path d="M4 18L9 6l5 12"/><path d="M6 14h6"/><path d="M17 6v12"/>'},
+  2:{k:2,a:"#3b9bf0",i:'<path d="M12 3v18M4.5 7.5l15 9M19.5 7.5l-15 9"/>'},
+  4:{k:4,a:"#f0913b",i:'<path d="M12 3s5 4 5 9a5 5 0 0 1-10 0c0-2 1-3 1-3 1 2 2 2 2 2s-1-5 2-8z"/>'},
+  5:{k:5,a:"#57c98a",i:'<circle cx="12" cy="12" r="2"/><path d="M12 10c3-4 8-4 8 0 0 2-4 2-8 2M12 14c-3 4-8 4-8 0 0-2 4-2 8-2"/>'},
+  6:{k:6,a:"#8b7bf0",i:'<path d="M12 3s6 6 6 11a6 6 0 0 1-12 0C6 9 12 3 12 3z"/>'}};
+MODE[3]=MODE[4];   // iNet X Panel reports Heating as 3
+const ORDER=[0,1,2,3,4,5,6];
+function modeName(v){ return (L().modes[v]!=null && L().modes[v]!=="")? L().modes[v] : ""; }
+
+/* ---------- state ---------- */
+let ST=null, TGT=220;
+const R=100,C=2*Math.PI*R,SWEEP=0.75;
+const $=s=>document.querySelector(s);
+const post=async(tn,pn,v)=>{ try{ const r=await fetch("/api/set",{method:"POST",headers:Object.assign({"Content-Type":"application/json"},authHeaders()),body:JSON.stringify({tn,pn,v})});
+    if(TRX && !r.ok) trxToast(t(TRX.view?"rmViewOnly":"rmCmdFail")); }catch(e){ if(TRX) trxToast(t("rmCmdFail")); } soonRefresh(); };
+let _soon=null; function soonRefresh(){ clearTimeout(_soon); _soon=setTimeout(()=>{ if(editIdx<0) refresh(false); },600); }
+
+let _hadReal=false, _fails=0;
+function fetchT(url,opt,ms){ const c=new AbortController(); const tm=setTimeout(()=>c.abort(),ms||5000);
+  return fetch(url,Object.assign({},opt||{},{signal:c.signal})).finally(()=>clearTimeout(tm)); }
+async function loadState(){
+  try{
+    const r=await fetchT("/api/state",{cache:"no-store",headers:authHeaders()},5000);
+    if(r.status===401 && REAL){ showLogin(true); return null; }
+    if(!r.ok) throw 0;
+    const j=await r.json(); const params=j.params||j;
+    if(j.bridge && j.bridge!=="connected" && _hadReal){ setStatus("bad","connecting"); return null; }   // bridge reconnecting: keep last values
+    if(!params||!params.length) throw 0;
+    _hadReal=true; _fails=0;
+    if(TRX && TRX.isStale()) setStatus("bad","offline"); else setStatus("ok","connected");
+    return {params, devices:j.devices||[], timers:j.timers||[]};
+  }catch(e){
+    // After real data was shown once, never swap in sample data: keep the last real values, show offline.
+    if(_hadReal){ if(++_fails>=2) setStatus("bad","offline"); return null; }
+    if(TRX){ setStatus("bad","connecting"); return null; }        // remote: wait for real data, no preview
+    setStatus("mock","preview"); return {params:MOCK.params, devices:MOCK.devices, timers:MOCK.timers}; }
+}
+function setStatus(cls,which){ $("#status").className="status "+cls; $("#statustext").textContent=t((which==="ok"||which==="connected")?"connected":(which==="mock"||which==="preview")?"preview":(which==="bad"||which==="offline")?"offline":"connecting"); }
+function pick(a,tn,pn){ return a.find(p=>p.topic===tn&&p.param===pn); }
+function normalize(params){
+  const climate=pick(params,"RoomClimate","Mode"),tgt=pick(params,"RoomClimate","TgtTemp");
+  const cur=pick(params,"AirCooling","Temp")||pick(params,"Temperature","Internal")||pick(params,"AirHeating","Temp");
+  const vent=pick(params,"AirCirculation","FanLevel");
+  const fan=pick(params,"AirCooling","Mode");          // AC fan (Aventa); Combi ventilation = RoomClimate mode
+  const heatMode=pick(params,"AirHeating","Mode");     // Combi Fast/Comfort, shown with heating
+  const waterCur=pick(params,"WaterHeating","Temp"), waterOn=pick(params,"WaterHeating","Active");
+  const water=pick(params,"WaterHeating","Mode"),gas=pick(params,"EnergySrc","GasLevel"),elec=pick(params,"EnergySrc","ElectricLevel");
+  const lightA=pick(params,"AmbientLight","Active"),lightS=pick(params,"AmbientLight","LightStep");
+  const alerts=params.filter(p=>/error|warning|fault|alert|frost/i.test(p.topic+p.param));
+  const gasLevels=params.filter(p=>p.topic==="LevelControl" && /level|bottle/i.test(p.param) && !/active/i.test(p.param));
+  const gasActive=pick(params,"LevelControl","ActiveBottle");
+  const fresh=pick(params,"FreshWater","Level"),grey=pick(params,"GreyWater","Level");
+  let batt=pick(params,"VBat","Voltage")||pick(params,"Battery","Voltage");
+  if(!batt){ const e=pick(params,"Eol","Vcc12");   // panel's 12 V supply in mV -> tenths of a volt
+    if(e&&e.value>0) batt=Object.assign({},e,{topic:"VBat",param:"Voltage",value:Math.round(e.value/100),writable:false,_src:e}); }
+  const bright=pick(params,"Panel","Intst");
+  const used=new Set([climate,tgt,cur,fan,vent,heatMode,waterCur,waterOn,water,gas,elec,lightA,lightS,fresh,grey,batt,batt&&batt._src,bright].filter(Boolean));
+  alerts.forEach(p=>used.add(p)); gasLevels.forEach(p=>used.add(p)); if(gasActive)used.add(gasActive);
+  return {params,climate,tgt,cur,fan,vent,heatMode,waterCur,waterOn,water,gas,elec,lightA,lightS,alerts,gasLevels,gasActive,fresh,grey,batt,bright,rest:params.filter(p=>!used.has(p))};
+}
+
+/* ---------- render main ---------- */
+function accentFor(m){ return (MODE[m]||MODE[0]).a; }
+// The mode colour only tints the climate page; other pages keep their own accent.
+function applyAccent(m){ const a=(MODE[m]||MODE[0]).a, el=$("#pg-climate"); el.style.setProperty("--accent",a); el.style.setProperty("--accent-soft",a+"22"); }
+function drawArc(tenths){ drawFrac(tenths==null?null:(tenths/10-16)/14); }
+function arcPoint(frac){ const f=Math.min(1,Math.max(0,frac)), ang=(135+f*270)*Math.PI/180; return [(120+R*Math.cos(ang)).toFixed(1),(120+R*Math.sin(ang)).toFixed(1)]; }
+function placeMark(el,frac){ if(!el)return; if(frac==null||isNaN(frac)){ el.style.opacity=0; return; }
+  const [x,y]=arcPoint(frac); el.setAttribute("cx",x); el.setAttribute("cy",y); el.style.opacity=.9; }
+function drawFrac(f){ const arc=$("#arc"),knob=$("#knob");
+  if(f==null){ arc.setAttribute("stroke-dasharray","0 "+C); knob.style.opacity=0; return; }
+  knob.style.opacity=1; const frac=Math.min(1,Math.max(0,f)); arc.setAttribute("stroke-dasharray",(frac*SWEEP*C)+" "+C);
+  const ang=(135+frac*270)*Math.PI/180; knob.setAttribute("cx",(120+R*Math.cos(ang)).toFixed(1)); knob.setAttribute("cy",(120+R*Math.sin(ang)).toFixed(1)); }
+function isVentMode(m){
+  const e=ST.climate&&ST.climate.enum?ST.climate.enum.find(x=>x.value===m):null;
+  return e ? /vent|fan|lüft|circ/i.test(e.name) : m===5; }
+function ventInfo(){ const f=ST.vent; if(!f) return null;
+  return {v:f.value||0,min:f.min!=null?f.min:0,max:f.max!=null?f.max:10}; }
+function renderClimate(){
+  const m=ST.climate?ST.climate.value:0; applyAccent(m);
+  $("#modeName").textContent=modeName(m);
+  const on=m!==0; TGT=ST.tgt?ST.tgt.value:220;
+  const vi=on&&isVentMode(m)?ventInfo():null;
+  if(vi){   // fan speed, e.g. 3 / 10
+    $("#unit").textContent="/"+vi.max; $("#tgt").textContent=String(vi.v);
+    drawFrac((vi.v-vi.min)/Math.max(1,vi.max-vi.min));
+  } else {
+    $("#unit").textContent=unitStr(); $("#tgt").textContent=on?fmtTemp(TGT,false):"--";
+    drawArc(on?TGT:null);
+  }
+  $("#cur").textContent=(ST.cur&&ST.cur.value!=null)? t("now")+" "+fmtTemp(ST.cur.value,true):"";
+  placeMark($("#curMark"), (!vi && ST.cur && ST.cur.value!=null) ? (ST.cur.value/10-16)/14 : null);
+  const wrap=$("#modes"); wrap.innerHTML="";
+  const allowed=ST.climate&&ST.climate.enum&&ST.climate.enum.length?ST.climate.enum.map(e=>e.value):[0,1,2,4,5,6];
+  for(const v of ORDER){ if(!allowed.includes(v))continue; const md=MODE[v]; const b=document.createElement("button");
+    b.className="mode"; b.setAttribute("aria-pressed",v===m);
+    b.innerHTML='<svg viewBox="0 0 24 24">'+md.i+'</svg><span>'+modeName(v)+'</span>';
+    b.onclick=()=>{ if(ST.climate){ST.climate.value=v; post("RoomClimate","Mode",v); renderClimate();} }; wrap.appendChild(b); }
+  $("#minus").disabled=!on; $("#plus").disabled=!on;
+  const csc=$("#climSrcCard");
+  if(on && !isVentMode(m) && (ST.gas||ST.elec||ST.heatMode)){ csc.classList.remove("hidden");
+    $("#climSrcLabel").textContent=t("energySource"); $("#climElecLabel").textContent=t("electricLevel");
+    renderSourceControls($("#climSrcRow"),$("#climSrcSeg"),$("#climElecRow"),$("#climElecSeg"));
+    const hr=$("#climHeatRow");
+    if(ST.heatMode&&(ST.heatMode.enum||[]).length){ hr.classList.remove("hidden"); $("#climHeatLabel").textContent=t("heatMode");
+      segFrom($("#climHeatSeg"),ST.heatMode.enum.map(o=>({name:tLevel(o.name),value:o.value})),ST.heatMode.value,
+        v=>{ST.heatMode.value=v; post(ST.heatMode.topic,ST.heatMode.param,v);});
+    } else hr.classList.add("hidden");
+  } else csc.classList.add("hidden");
+  const ch=$("#climateHistory"); if(ch){ ch.innerHTML=""; if(ST.cur){ const hs=HISTORY[ST.cur.topic+"."+ST.cur.param]; if(hs&&hs.values&&hs.values.length>1) ch.innerHTML=trendChart(hs.values,hs.interval,accentFor(m),v=>fmtTemp(v,true)); } }
+}
+function bump(d){
+  const m=ST.climate?ST.climate.value:0, vi=m!==0&&isVentMode(m)?ventInfo():null;
+  if(vi){ const v=Math.min(vi.max,Math.max(vi.min,vi.v+(d>0?1:-1))); ST.vent.value=v;
+    $("#tgt").textContent=String(v); drawFrac((v-vi.min)/Math.max(1,vi.max-vi.min)); post(ST.vent.topic,ST.vent.param,v); return; }
+  if(!ST.tgt)return; let v=Math.min(300,Math.max(160,(ST.tgt.value||220)+d)); ST.tgt.value=v;TGT=v; $("#tgt").textContent=fmtTemp(v,false); drawArc(v); post("RoomClimate","TgtTemp",v); }
+
+function segFrom(seg,opts,curVal,onPick){ seg.innerHTML="";
+  for(const o of opts){ const b=document.createElement("button"); b.textContent=o.name; b.setAttribute("aria-pressed",o.value===curVal);
+    b.onclick=()=>{ seg.querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",false)); b.setAttribute("aria-pressed",true); onPick(o.value); }; seg.appendChild(b); } }
+
+function renderFan(){ const card=$("#fanCard"); if(!ST.fan){card.classList.add("hidden");return;} card.classList.remove("hidden");
+  $("#fanTitle").textContent=t("fan");
+  const opts=(ST.fan.enum&&ST.fan.enum.length?ST.fan.enum:Array.from({length:(ST.fan.max||3)-(ST.fan.min||0)+1},(_,i)=>({name:String((ST.fan.min||0)+i),value:(ST.fan.min||0)+i}))).map(o=>({name:tLevel(o.name),value:o.value}));
+  segFrom($("#fanSeg"),opts,ST.fan.value,v=>{ST.fan.value=v; post(ST.fan.topic,ST.fan.param,v);}); }
+
+function waterTargetC(){ if(!ST.water) return null; const e=(ST.water.enum||[]).find(x=>x.value===ST.water.value);
+  const n=e?parseInt(e.name,10):NaN; return isNaN(n)?null:n; }
+function renderWaterDial(){ const d=$("#wDial"); if(!ST.water&&!ST.waterCur){ d.classList.add("hidden"); return; } d.classList.remove("hidden");
+  const tc=waterTargetC(), frac=c=>(c-10)/60;
+  $("#wUnit").textContent=unitStr();
+  $("#wTgt").textContent = tc!=null ? num1(CFG.unit==="F"?tc*9/5+32:tc).replace(/[.,]0$/,"") : "--";
+  const arc=$("#wArc"), f=tc!=null?Math.min(1,Math.max(0,frac(tc))):0; arc.setAttribute("stroke-dasharray",(f*SWEEP*C)+" "+C);
+  const cur=ST.waterCur&&ST.waterCur.value!=null?ST.waterCur.value:null;
+  $("#wCur").textContent = cur!=null ? t("now")+" "+fmtTemp(cur,true) : "";
+  $("#wState").textContent = "";   // meaning of WaterHeating.Active not confirmed yet: no state label
+  placeMark($("#wMark"), cur!=null ? frac(cur/10) : null); }
+function renderEnergy(){ renderWaterDial(); const card=$("#energyCard"); if(!(ST.gas||ST.elec||ST.water)){card.classList.add("hidden");return;} card.classList.remove("hidden");
+  $("#energyTitle").textContent=t("waterEnergy"); $("#srcLabel").textContent=t("energySource"); $("#elecLabel").textContent=t("electricLevel"); $("#waterLabel").textContent=t("waterTemp");
+  renderSourceControls($("#srcRow"),$("#srcSeg"),$("#elecRow"),$("#elecSeg"));
+  const waterRow=$("#waterRow");
+  if(ST.water){ waterRow.classList.remove("hidden");
+    const opts=(ST.water.enum||[]).map(o=>{ const n=tLevel(o.name); return {name:/^\d+$/.test(n)?n+" °C":n,value:o.value}; });
+    segFrom($("#waterSeg"),opts,ST.water.value,v=>{ST.water.value=v; post("WaterHeating","Mode",v);});
+  } else waterRow.classList.add("hidden"); }
+function curSource(){ const gasOn=ST.gas&&ST.gas.value>0, elecOn=ST.elec&&ST.elec.value>0; return (gasOn&&elecOn)?"mix":elecOn?"electric":"gas"; }
+function powerName(v){ const e=ST.elec&&(ST.elec.enum||[]).find(x=>x.value===v); return e?fmtPower(e.name):String(v); }
+function fmtPower(n){ return String(n).replace(/^(\d+)\s*W$/i,"$1 W"); }     // "900W" -> "900 W"
+function renderSourceControls(srcRow,srcSeg,elecRow,elecSeg){
+  if(ST.gas||ST.elec){ srcRow.classList.remove("hidden");
+    const opts=[]; if(ST.gas)opts.push({name:t("gas"),value:"gas"}); if(ST.elec)opts.push({name:t("electric"),value:"electric"}); if(ST.gas&&ST.elec)opts.push({name:t("mix"),value:"mix"});
+    segFrom(srcSeg,opts,curSource(),setSource);
+  } else srcRow.classList.add("hidden");
+  if(ST.elec&&ST.elec.value>0){ elecRow.classList.remove("hidden");
+    const lv=(ST.elec.enum||[]).filter(e=>e.value>0).map(e=>({name:fmtPower(tLevel(e.name)),value:e.value}));
+    segFrom(elecSeg,lv,ST.elec.value,v=>{ST.elec.value=v; post("EnergySrc","ElectricLevel",v); renderEnergy(); renderClimate(); renderHome();});
+  } else elecRow.classList.add("hidden");
+}
+function setSource(src){ const setGas=v=>{if(ST.gas){ST.gas.value=v;post("EnergySrc","GasLevel",v);}}; const setElec=v=>{if(ST.elec){ST.elec.value=v;post("EnergySrc","ElectricLevel",v);}}; const keep=()=> (ST.elec&&ST.elec.value>0)?ST.elec.value:1;
+  if(src==="gas"){setGas(1);setElec(0);} else if(src==="electric"){setGas(0);setElec(keep());} else {setGas(1);setElec(keep());} renderEnergy(); renderClimate(); renderHome(); }
+
+function renderLight(){ const card=$("#lightCard"); if(!ST.lightA){card.classList.add("hidden");return;} card.classList.remove("hidden");
+  $("#lightTitle").textContent=t("ambientLight");
+  const tg=$("#lightToggle"); tg.setAttribute("aria-pressed",ST.lightA.value===1);
+  tg.onclick=()=>{const nv=ST.lightA.value===1?0:1; ST.lightA.value=nv; tg.setAttribute("aria-pressed",nv===1); post("AmbientLight","Active",nv);};
+  const s=$("#lightStep"); if(ST.lightS){s.style.display=""; s.value=ST.lightS.value; s.oninput=()=>{ST.lightS.value=+s.value;}; s.onchange=()=>post("AmbientLight","LightStep",+s.value);} else s.style.display="none"; }
+
+function renderAll(){ const box=$("#allParams"); box.innerHTML=""; const byDev={};
+  for(const p of ST.rest){ (byDev[p.device||"device"]=byDev[p.device||"device"]||[]).push(p); }
+  for(const dev of Object.keys(byDev)){ const h=document.createElement("div"); h.className="devname"; h.textContent=dev; box.appendChild(h);
+    for(const p of byDev[dev]) box.appendChild(prow(p)); }
+  if(!ST.rest.length) box.innerHTML='<div class="prow"><span class="val">'+t("noParams")+'</span></div>'; }
+function prow(p){ const row=document.createElement("div"); row.className="prow";
+  const k=document.createElement("div"); k.className="k"; k.textContent=prettify(p.param); row.appendChild(k);
+  if(!p.writable){ const v=document.createElement("div"); v.className="val"; v.textContent=fmtVal(p); row.appendChild(v); return row; }
+  let inp; if(p.enum&&p.enum.length){ inp=document.createElement("select"); for(const e of p.enum){const o=document.createElement("option");o.value=e.value;o.textContent=tLevel(e.name);if(e.value===p.value)o.selected=true;inp.appendChild(o);} }
+  else { inp=document.createElement("input"); inp.type="number"; if(p.min!=null)inp.min=p.min; if(p.max!=null)inp.max=p.max; inp.value=p.value; }
+  inp.onchange=()=>post(p.topic,p.param,Number(inp.value)); row.appendChild(inp); return row; }
+function fmtVal(p){ if(p.enum){const e=p.enum.find(e=>e.value===p.value); if(e)return tLevel(e.name);} if(isTempParam(p))return fmtTemp(p.value,true); return String(p.value); }
+
+/* ---------- alerts / status / timers / display ---------- */
+function alertActive(p){ if(p.enum){const e=p.enum.find(e=>e.value===p.value); return e && !/none|ok|no error|geen|kein|aucun|nessun|ningun/i.test(e.name);} return p.value!==0; }
+function alertText(p){ let v=p.value; if(p.enum){const e=p.enum.find(e=>e.value===v); if(e)v=tLevel(e.name);} return (p.device?p.device+": ":"")+v; }
+function renderAlerts(){ const box=$("#alerts"); box.innerHTML="";
+  const dev=(ST.alerts||[]).filter(alertActive).map(p=>({id:"dev:"+p.topic+p.param,txt:alertText(p),sev:/error|fault/i.test(p.topic+p.param)?"err":"warn"}));
+  const all=dev.concat(thresholdAlerts());
+  const activeIds=new Set(all.map(a=>a.id));
+  DISMISSED.forEach(id=>{ if(!activeIds.has(id)) DISMISSED.delete(id); });  // recovered -> can alert again
+  const show=all.filter(a=>!DISMISSED.has(a.id));
+  for(const a of show){ const d=document.createElement("div"); d.className="alert "+a.sev;
+    const s=document.createElement("span"); s.style.flex="1"; s.textContent=a.txt;
+    const x=document.createElement("button"); x.className="alert-x"; x.setAttribute("aria-label","dismiss"); x.textContent="\u00d7";
+    x.onclick=()=>{ DISMISSED.add(a.id); renderAlerts(); };
+    d.appendChild(s); d.appendChild(x); box.appendChild(d); }
+  box.style.display=show.length?"":"none"; }
+
+function bar(label,pct,text,color){ const w=document.createElement("div"); w.className="barrow";
+  w.innerHTML='<div class="bl"><span>'+label+'</span><span class="bv">'+text+'</span></div><div class="track2"><div class="fill2" style="width:'+Math.max(0,Math.min(100,pct))+'%;background:'+color+'"></div></div>'; return w; }
+function renderGas(){
+  const wrap=$("#gasSection"); const gas=ST.gasLevels||[];
+  if(!gas.length){ wrap.style.display="none"; wrap.innerHTML=""; return; }
+  wrap.style.display=""; wrap.innerHTML="";
+  const grid=document.createElement("div"); grid.className="gasgrid";
+  gas.forEach((g,i)=>{
+    const pct=g.value, kg=pct/100*bottleFullKg(g.param);
+    const col=pct<=15?"#e23b3b":pct<=40?"#f0a022":"#35c26a";
+    const act=ST.gasActive&&ST.gasActive.value===(i+1);
+    const c=document.createElement("div"); c.className="gascard";
+    c.innerHTML=
+      '<div class="gastitle">'+t("gasLevel")+(gas.length>1?" "+(i+1):"")+(act?" · "+t("active"):"")+'</div>'+
+      '<div class="gasrow"><svg class="bottle" viewBox="0 0 40 56">'+
+        '<path fill="currentColor" d="M16 2h8v3l3 4v40a4 4 0 0 1-4 4H17a4 4 0 0 1-4-4V9l3-4z"/>'+
+        '<path fill="var(--surface)" d="M20 15c2 2.4 3 3.4 3 5.4a3 3 0 0 1-6 0c0-1.2.7-2.2 1.6-3C19.4 19 20 18 20 15z"/></svg>'+
+        '<div><div class="gaspct">'+pct+' %</div><div class="gaskg">'+num1(kg)+' kg</div></div></div>'+
+      '<div class="gasbar"><div style="width:'+Math.max(0,Math.min(100,pct))+'%;background:'+col+'"></div></div>';
+    const hs=HISTORY["LevelControl."+g.param];
+    if(hs&&hs.values&&hs.values.length>1){ const hd=document.createElement("div"); hd.className="gashist"; hd.innerHTML=trendChart(hs.values,hs.interval,col,v=>v+" %");
+      const dd=daysToEmpty(hs.values,hs.interval); if(dd&&isFinite(dd)) hd.innerHTML+='<div class="est">'+t("emptyIn",{n:Math.round(dd)})+'</div>'; c.appendChild(hd); }
+    grid.appendChild(c);
+  });
+  wrap.appendChild(grid);
+}
+function renderStatus(){ const card=$("#statusCard");
+  const fresh=ST.fresh,grey=ST.grey,batt=ST.batt;
+  if(!fresh&&!grey&&!batt){ card.classList.add("hidden"); return; }
+  card.classList.remove("hidden"); $("#statusTitle").textContent=t("status");
+  const b=$("#statusBody"); b.innerHTML="";
+  if(fresh) b.appendChild(bar(t("freshWater"),fresh.value,fresh.value+" %","#3b9bf0"));
+  if(grey)  b.appendChild(bar(t("greyWater"),grey.value,grey.value+" %","#6b7a8d"));
+  if(batt){ const v=batt.value/10; b.appendChild(bar(t("battery"),(v-10.5)/(14.6-10.5)*100,num1(v)+" V","#35c26a")); }
+}
+
+let TIMERS=[], editIdx=-1;
+function renderTimers(){ const card=$("#timersCard");
+  TIMERS=(ST.timers||[]).map(x=>Object.assign({},x));
+  card.classList.remove("hidden"); $("#timersTitle").textContent=t("timers");
+  const b=$("#timersBody"); b.innerHTML="";
+  TIMERS.forEach((tm,idx)=>{
+    const row=document.createElement("div"); row.className="prow";
+    const k=document.createElement("div"); k.className="k"; k.style.cursor="pointer";
+    k.innerHTML=(tm.start||"--:--")+"–"+(tm.end||"--:--")+'<small>'+fmtTemp(tm.temp||210,true)+'</small>';
+    k.onclick=()=>{ editIdx=(editIdx===idx?-1:idx); renderTimers(); };
+    const tg=document.createElement("div"); tg.className="toggle"; tg.setAttribute("aria-pressed",!!tm.active);
+    tg.onclick=()=>{ tm.active=!tm.active; commitTimers(); };
+    row.appendChild(k); row.appendChild(tg); b.appendChild(row);
+    if(editIdx===idx) b.appendChild(timerEditor(tm,idx));
+  });
+  const add=document.createElement("button"); add.className="pill"; add.style.marginTop="10px";
+  add.textContent="+ "+t("addTimer");
+  add.onclick=()=>{ TIMERS.push({id:Date.now(),active:true,start:"07:00",end:"09:00",temp:210}); editIdx=TIMERS.length-1; commitTimers(); };
+  b.appendChild(add);
+}
+function timerEditor(tm,idx){
+  const w=document.createElement("div"); w.style.cssText="background:var(--surface2);border:1px solid var(--line);border-radius:12px;padding:14px;margin:8px 0 4px";
+  const inpCss="background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:9px;padding:9px;font-size:.9rem";
+  const timeRow=(lkey,val,on)=>{ const r=document.createElement("div"); r.className="subrow";
+    const l=document.createElement("label"); l.textContent=t(lkey); const i=document.createElement("input");
+    i.type="time"; i.value=val||""; i.style.cssText=inpCss; i.onchange=()=>on(i.value);
+    r.appendChild(l); r.appendChild(i); return r; };
+  w.appendChild(timeRow("start",tm.start,v=>{tm.start=v;commitTimers();}));
+  w.appendChild(timeRow("end",tm.end,v=>{tm.end=v;commitTimers();}));
+  const tr=document.createElement("div"); tr.className="subrow";
+  const tl=document.createElement("label"); tl.textContent=t("target"); tr.appendChild(tl);
+  const seg=document.createElement("div"); seg.style.cssText="display:flex;align-items:center;gap:14px";
+  const mk=(txt,fn)=>{ const btn=document.createElement("button"); btn.className="pill"; btn.textContent=txt; btn.style.padding="8px 16px"; btn.onclick=fn; return btn; };
+  const val=document.createElement("span"); val.style.cssText="min-width:74px;text-align:center;font-variant-numeric:tabular-nums"; val.textContent=fmtTemp(tm.temp||210,true);
+  seg.appendChild(mk("\u2212",()=>{tm.temp=Math.max(160,(tm.temp||210)-5); val.textContent=fmtTemp(tm.temp,true); commitTimers();}));
+  seg.appendChild(val);
+  seg.appendChild(mk("+",()=>{tm.temp=Math.min(300,(tm.temp||210)+5); val.textContent=fmtTemp(tm.temp,true); commitTimers();}));
+  tr.appendChild(seg); w.appendChild(tr);
+  const del=document.createElement("button"); del.className="pill"; del.style.cssText="width:100%;margin-top:8px;color:#f0808a;border-color:#5a1e1e";
+  del.textContent=t("del"); del.onclick=()=>{ TIMERS.splice(idx,1); editIdx=-1; commitTimers(); };
+  w.appendChild(del);
+  return w;
+}
+function commitTimers(){
+  ST.timers=TIMERS.map(x=>Object.assign({},x));
+  try{ localStorage.setItem("trumax_timers",JSON.stringify(ST.timers)); }catch(e){}
+  fetch("/api/timers",{method:"POST",headers:Object.assign({"Content-Type":"application/json"},authHeaders()),body:JSON.stringify(ST.timers)}).catch(()=>{});
+  renderTimers();
+}
+
+function renderDisplay(){ const sec=$("#displaySec");
+  if(!ST||!ST.bright){ sec.classList.add("hidden"); return; }
+  sec.classList.remove("hidden"); $("#dispHead").textContent=t("display"); $("#brightLabel").textContent=t("brightness");
+  const s=$("#brightRange"); s.min=ST.bright.min||10; s.max=ST.bright.max||100; s.value=ST.bright.value;
+  s.oninput=()=>{ST.bright.value=+s.value;}; s.onchange=()=>post("Panel","Intst",+s.value); }
+
+/* ---------- settings ---------- */
+function renderSettings(){
+  $("#setTitle").textContent=t("settings"); $("#langHead").textContent=t("language"); $("#unitHead").textContent=t("unit");
+  $("#devHead").textContent=t("devices"); $("#remoteHead").textContent=t("remote");
+  const lw=$("#langWrap"); lw.innerHTML="";
+  for(const [code,label] of LANGS){ const b=document.createElement("button"); b.className="pill"; b.textContent=label; b.setAttribute("aria-pressed",code===CFG.lang);
+    b.onclick=()=>{CFG.lang=code; saveCfg(); document.documentElement.lang=code; renderAllViews();}; lw.appendChild(b); }
+  const uw=$("#unitWrap"); uw.innerHTML="";
+  for(const [code,label] of [["C",t("celsius")+" °C"],["F",t("fahrenheit")+" °F"]]){ const b=document.createElement("button"); b.className="pill"; b.textContent=label; b.setAttribute("aria-pressed",code===CFG.unit);
+    b.onclick=()=>{CFG.unit=code; saveCfg(); renderAllViews();}; uw.appendChild(b); }
+  $("#bleNameLabel").textContent=t("bleName"); $("#bleNameHint").textContent=t("bleNameHint");
+  const bi=$("#bleNameInput"); if(document.activeElement!==bi) bi.value=BLENAME;
+  bi.onchange=async()=>{ BLENAME=(bi.value.trim()||"truma-x").slice(0,32); bi.value=BLENAME;
+    try{ await fetch("/api/settings",{method:"POST",headers:Object.assign({"Content-Type":"application/json"},authHeaders()),body:JSON.stringify({bleName:BLENAME})}); }catch(e){} };
+  const dl=$("#devList"); dl.innerHTML="";
+  const devs=(ST&&ST.devices)?ST.devices:[];
+  for(const d of devs){ const c=document.createElement("div"); c.className="devcard";
+    c.innerHTML='<div class="dh"><b>'+d.name+'</b>'+(d.controllable?'<span class="badge">'+t("controllable")+'</span>':'')+'</div>'+
+      '<div class="meta"><span>'+t("type")+'</span><span>'+tType(d.type)+'</span>'+
+      '<span>'+t("serial")+'</span><span>'+(d.serial||"—")+'</span>'+
+      '<span>'+t("firmware")+'</span><span>'+(d.fw||"—")+'</span>'+
+      '<span>'+t("address")+'</span><span>'+(d.addr||"—")+'</span></div>';
+    dl.appendChild(c); }
+  renderRemote();
+  renderDisplay();
+  renderOverview();
+  renderScale();
+  renderFw();
+  renderNotify();
+  renderSecurity();
+  renderNetwork();
+  renderBle();
+}
+
+/* firmware / OTA */
+let VERSION="";
+let UPD={version:"",repo:"",auto:false,latest:"",available:false};
+async function loadUpdate(){ try{ const r=await fetch("/api/update",{headers:authHeaders()}); if(r.ok){ const j=await r.json(); if(j&&typeof j.available==="boolean") UPD=j; } }catch(e){} }
+async function saveUpdateCfg(patch){ Object.assign(UPD,patch); renderFw();
+  try{ await fetch("/api/settings",{method:"POST",headers:Object.assign({"Content-Type":"application/json"},authHeaders()),body:JSON.stringify({update:{repo:UPD.repo,auto:UPD.auto,manifest:UPD.manifest||""}})}); }catch(e){} }
+async function doCheck(){ $("#updMsg").textContent=t("checking"); try{ const r=await fetch("/api/update/check",{method:"POST",headers:authHeaders()}); if(r.ok){ const j=await r.json(); if(j&&typeof j.available==="boolean") UPD=j; } }catch(e){} renderFw(); }
+async function doInstall(){ $("#updMsg").textContent=t("rebooting"); try{ await fetch("/api/update/install",{method:"POST",headers:authHeaders()}); }catch(e){} }
+function renderFw(){
+  $("#fwHead").textContent=t("firmwareUpdate"); $("#verLabel").textContent=t("version");
+  $("#verVal").textContent=(VERSION||UPD.version||"—");
+  $("#repoLabel").textContent=t("repo"); $("#autoLabel").textContent=t("autoUpdate");
+  $("#checkBtn").textContent=t("checkNow"); $("#installBtn").textContent=t("updateNow");
+  $("#fwBtn").textContent=t("update"); $("#manualLabel").textContent=t("manualUpload");
+  const ri=$("#repoInput"); if(document.activeElement!==ri) ri.value=UPD.repo||"";
+  ri.onchange=()=>saveUpdateCfg({repo:ri.value});
+  $("#manLabel").textContent=t("manifest");
+  const mi=$("#manInput"); if(document.activeElement!==mi) mi.value=UPD.manifest||"";
+  mi.onchange=()=>saveUpdateCfg({manifest:mi.value});
+  const at=$("#autoToggle"); at.setAttribute("aria-pressed",!!UPD.auto); at.onclick=()=>saveUpdateCfg({auto:!UPD.auto});
+  $("#checkBtn").onclick=doCheck;
+  const ib=$("#installBtn"); ib.classList.toggle("hidden",!UPD.available); ib.onclick=doInstall;
+  $("#updMsg").textContent = UPD.available ? (t("updateAvailable")+" "+UPD.latest) : (UPD.latest ? t("upToDate") : "");
+  $("#fwBtn").onclick=doOta;
+}
+function doOta(){
+  const f=$("#fwFile").files[0]; if(!f)return;
+  const prog=$("#fwProg"),fill=$("#fwFill"),msg=$("#fwMsg"); prog.style.display=""; $("#fwBtn").disabled=true; msg.textContent=t("updating");
+  const xhr=new XMLHttpRequest(); xhr.open("POST","/api/ota");
+  if(TOKEN) xhr.setRequestHeader("X-Truma-Token",TOKEN);
+  xhr.upload.onprogress=e=>{ if(e.lengthComputable){ const p=Math.round(e.loaded/e.total*100); fill.style.width=p+"%"; msg.textContent=t("updating")+" "+p+"%"; } };
+  xhr.onload=()=>{ if(xhr.status===200){ fill.style.width="100%"; msg.textContent=t("rebooting"); } else { msg.textContent="Error "+xhr.status; $("#fwBtn").disabled=false; } };
+  xhr.onerror=()=>{ msg.textContent="Error"; $("#fwBtn").disabled=false; };
+  xhr.send(f);
+}
+
+/* ---------- security / remote access ---------- */
+let TOKEN=""; try{ TOKEN=localStorage.getItem("trumax_token")||""; }catch(e){}
+function authHeaders(){ return TOKEN?{"X-Truma-Token":TOKEN}:{}; }
+const SEC={authEnabled:false,tlsEnabled:false,tokenSet:false};
+function loadLocalSec(){ try{const s=JSON.parse(localStorage.getItem("trumax_sec")||"null"); if(s){SEC.authEnabled=!!s.authEnabled;SEC.tlsEnabled=!!s.tlsEnabled;SEC.tokenSet=!!s.tokenSet;}}catch(e){} }
+function saveLocalSec(){ try{localStorage.setItem("trumax_sec",JSON.stringify({authEnabled:SEC.authEnabled,tlsEnabled:SEC.tlsEnabled,tokenSet:SEC.tokenSet}));}catch(e){} }
+let REAL=false;
+async function loadSettings(){
+  try{ const r=await fetch("/api/settings",{cache:"no-store",headers:authHeaders()}); if(!r.ok)throw 0; const j=await r.json();
+    if(j.app!=="truma-x") throw 0;   // not our device -> preview, never lock out
+    REAL=true; SEC.authEnabled=!!j.authEnabled; SEC.tlsEnabled=!!j.tlsEnabled; SEC.tokenSet=!!j.tokenSet;
+    if(j.notify)Object.assign(NOTIFY,j.notify); if(j.scale)Object.assign(SCALE,j.scale); VERSION=j.version||"";
+    if(typeof j.bleName==="string") BLENAME=j.bleName; }
+  catch(e){ REAL=false; loadLocalSec(); loadLocalNotify(); loadLocalScale(); }   // preview / offline: fall back to local
+}
+async function saveSettings(patch){
+  Object.assign(SEC,patch); saveLocalSec(); renderSecurity();
+  try{ await fetch("/api/settings",{method:"POST",headers:Object.assign({"Content-Type":"application/json"},authHeaders()),body:JSON.stringify(patch)}); }catch(e){}
+}
+function setDeviceToken(tok){ TOKEN=tok; try{localStorage.setItem("trumax_token",tok);}catch(e){} saveSettings({token:tok,tokenSet:!!tok}); }
+function renderSecurity(){
+  $("#secHead").textContent=t("security"); $("#reqPwLabel").textContent=t("requirePw");
+  $("#tokenLabel").textContent=t("accessToken"); $("#tokenSave").textContent=t("save");
+  $("#httpsLabel").textContent=t("https"); $("#secNote").textContent=t("restartNote");
+  const at=$("#authToggle"); at.setAttribute("aria-pressed",SEC.authEnabled); at.onclick=()=>saveSettings({authEnabled:!SEC.authEnabled});
+  $("#pwWrap").style.display=SEC.authEnabled?"":"none";
+  const ti=$("#tokenInput"); ti.placeholder=SEC.tokenSet?"••••••••":"";
+  $("#tokenSave").onclick=()=>{ if(ti.value){ setDeviceToken(ti.value); ti.value=""; } };
+  const tt=$("#tlsToggle"); tt.setAttribute("aria-pressed",SEC.tlsEnabled); tt.onclick=()=>saveSettings({tlsEnabled:!SEC.tlsEnabled});
+}
+function showLogin(err){ $("#login").classList.remove("hidden");
+  $("#loginTitle").textContent=t("loginTitle"); $("#loginDesc").textContent=t("loginDesc");
+  $("#loginLabel").textContent=t("accessToken"); $("#loginBtn").textContent=t("unlock");
+  $("#loginErr").textContent=err===true?t("wrongToken"):""; $("#loginToken").placeholder=t("accessToken");
+  setTimeout(()=>{try{$("#loginToken").focus();}catch(e){}},50); }
+function doLogin(){ const v=$("#loginToken").value; if(!v)return; TOKEN=v; try{localStorage.setItem("trumax_token",v);}catch(e){} $("#login").classList.add("hidden"); refresh(); }
+
+/* notifications / thresholds (in-app banner always; phone push via webhook) */
+const NOTIFY={enabled:false,webhook:"",gasMin:20,waterMin:15,greyMax:85};
+const DISMISSED=new Set();
+const SCALE={fullKg:11,bottles:{}};
+function loadLocalScale(){ try{const s=JSON.parse(localStorage.getItem("trumax_scale")||"null"); if(s)Object.assign(SCALE,s);}catch(e){} }
+function saveLocalScale(){ try{localStorage.setItem("trumax_scale",JSON.stringify(SCALE));}catch(e){} }
+function bottleFullKg(param){ const b=SCALE.bottles||{}; return (b[param]!=null?b[param]:(SCALE.fullKg||11)); }
+async function saveScale(patch){
+  if(patch.bottles) SCALE.bottles=Object.assign({},SCALE.bottles,patch.bottles);
+  const rest=Object.assign({},patch); delete rest.bottles; Object.assign(SCALE,rest);
+  saveLocalScale(); renderScale(); if(ST)renderGas();
+  try{ await fetch("/api/settings",{method:"POST",headers:Object.assign({"Content-Type":"application/json"},authHeaders()),body:JSON.stringify({scale:SCALE})}); }catch(e){}
+}
+function scaleInput(val,on){ const inp=document.createElement("input"); inp.type="number"; inp.min="1"; inp.max="40"; inp.step="0.5";
+  inp.value=val; inp.style.cssText="width:130px;background:var(--surface2);color:var(--fg);border:1px solid var(--line);border-radius:9px;padding:9px";
+  inp.onchange=()=>on(+inp.value||11); return inp; }
+function renderScale(){ $("#scaleHead").textContent=t("gasBottle");
+  const box=$("#scaleBody"); box.innerHTML="";
+  // measurement source: HX711 load cell vs GOK Senso4s (BLE)
+  const srow=document.createElement("div"); srow.className="subrow";
+  const slab=document.createElement("label"); slab.textContent=t("source");
+  const sel=document.createElement("select"); sel.style.cssText="background:var(--surface2);color:var(--fg);border:1px solid var(--line);border-radius:9px;padding:9px";
+  [["hx711",t("hx711")],["senso4s",t("senso4s")],["off",t("sourceOff")]].forEach(o=>{ const opt=document.createElement("option"); opt.value=o[0]; opt.textContent=o[1]; if((SCALE.source||"hx711")===o[0])opt.selected=true; sel.appendChild(opt); });
+  sel.onchange=()=>saveScale({source:sel.value});
+  srow.appendChild(slab); srow.appendChild(sel); box.appendChild(srow);
+  const gas=(ST&&ST.gasLevels)||[];
+  if(gas.length){
+    gas.forEach((g,i)=>{ const row=document.createElement("div"); row.className="subrow"; if(i===gas.length-1)row.style.margin="0";
+      const lab=document.createElement("label"); lab.textContent=t("gasLevel")+(gas.length>1?" "+(i+1):"")+" — "+t("fullGas");
+      row.appendChild(lab); row.appendChild(scaleInput(bottleFullKg(g.param),v=>{const o={};o[g.param]=v;saveScale({bottles:o});}));
+      const zero=document.createElement("button"); zero.className="pill"; zero.textContent=t("zero"); zero.style.marginLeft="8px";
+      zero.onclick=()=>{ fetch("/api/tare",{method:"POST",headers:Object.assign({"Content-Type":"application/json"},authHeaders()),body:JSON.stringify({bottle:g.param})}).catch(()=>{}); zero.textContent="✓"; setTimeout(()=>zero.textContent=t("zero"),1200); };
+      row.appendChild(zero); box.appendChild(row); });
+  } else {
+    const row=document.createElement("div"); row.className="subrow"; row.style.margin="0";
+    const lab=document.createElement("label"); lab.textContent=t("fullGas");
+    row.appendChild(lab); row.appendChild(scaleInput(SCALE.fullKg,v=>saveScale({fullKg:v}))); box.appendChild(row);
+  }
+}
+function loadLocalNotify(){ try{const s=JSON.parse(localStorage.getItem("trumax_notify")||"null"); if(s)Object.assign(NOTIFY,s);}catch(e){} }
+function saveLocalNotify(){ try{localStorage.setItem("trumax_notify",JSON.stringify(NOTIFY));}catch(e){} }
+async function saveNotify(patch){ Object.assign(NOTIFY,patch); saveLocalNotify(); renderNotify(); if(ST)renderAlerts();
+  try{ await fetch("/api/settings",{method:"POST",headers:Object.assign({"Content-Type":"application/json"},authHeaders()),body:JSON.stringify({notify:patch})}); }catch(e){} }
+function renderNotify(){
+  $("#notifHead").textContent=t("notifications"); $("#notifOnLabel").textContent=t("enableNotify"); $("#webhookLabel").textContent=t("webhook");
+  const tg=$("#notifToggle"); tg.setAttribute("aria-pressed",NOTIFY.enabled); tg.onclick=()=>saveNotify({enabled:!NOTIFY.enabled});
+  const wi=$("#webhookInput"); if(document.activeElement!==wi) wi.value=NOTIFY.webhook||""; wi.onchange=()=>saveNotify({webhook:wi.value});
+  thrRow("gasThr","gasThrLabel","gasMin","lowGasThr"); thrRow("waterThr","waterThrLabel","waterMin","lowWaterThr"); thrRow("greyThr","greyThrLabel","greyMax","highGreyThr");
+}
+function thrRow(sid,lid,key,lkey){ const s=$("#"+sid),lab=$("#"+lid); const upd=()=>lab.textContent=t(lkey)+" "+s.value+"%"; s.value=NOTIFY[key]; upd(); s.oninput=upd; s.onchange=()=>{const o={};o[key]=+s.value;saveNotify(o);}; }
+function gasLabel(i){ return t("gasLevel")+((ST.gasLevels&&ST.gasLevels.length>1)?" "+(i+1):""); }
+function thresholdAlerts(){ const out=[];
+  (ST.gasLevels||[]).forEach((g,i)=>{ if(g.value<=NOTIFY.gasMin) out.push({id:"thr:"+g.param,txt:gasLabel(i)+": "+t("low")+" ("+g.value+"%)",sev:"warn"}); });
+  if(ST.fresh&&ST.fresh.value<=NOTIFY.waterMin) out.push({id:"thr:fresh",txt:t("freshWater")+": "+t("low")+" ("+ST.fresh.value+"%)",sev:"warn"});
+  if(ST.grey&&ST.grey.value>=NOTIFY.greyMax) out.push({id:"thr:grey",txt:t("greyWater")+": "+t("full")+" ("+ST.grey.value+"%)",sev:"warn"});
+  return out; }
+
+/* ---------- network (Wi-Fi / cellular) ---------- */
+const NET={mode:"auto_wifi",wifiSsid:"",wifiPassSet:false,apn:"",wifiConnected:false,cellConnected:false};
+async function loadNetwork(){ try{ const r=await fetch("/api/network",{cache:"no-store",headers:authHeaders()}); if(r.ok){ Object.assign(NET,await r.json()); } }catch(e){} }
+async function saveNetwork(patch){ Object.assign(NET,patch);
+  try{ await fetch("/api/network",{method:"POST",headers:Object.assign({"Content-Type":"application/json"},authHeaders()),body:JSON.stringify(patch)}); }catch(e){} }
+function renderNetwork(){
+  $("#netHead").textContent=t("connectivity"); $("#wifiSsidLabel").textContent=t("wifiSsid"); $("#wifiPassLabel").textContent=t("wifiPass");
+  $("#apnLabel").textContent=t("apn"); $("#netSaveBtn").textContent=t("save");
+  const modes=[["wifi",t("modeWifi")],["cellular",t("modeCell")],["auto_wifi",t("modeAutoWifi")],["auto_cell",t("modeAutoCell")]];
+  const mw=$("#netModeWrap"); mw.innerHTML="";
+  for(const [code,label] of modes){ const b=document.createElement("button"); b.className="pill"; b.textContent=label; b.setAttribute("aria-pressed",code===NET.mode);
+    b.onclick=()=>{ NET.mode=code; renderNetwork(); }; mw.appendChild(b); }
+  const showWifi=NET.mode!=="cellular", showApn=NET.mode!=="wifi";
+  $("#wifiRow").style.display=showWifi?"":"none"; $("#wifiPassRow").style.display=showWifi?"":"none"; $("#apnRow").style.display=showApn?"":"none";
+  const si=$("#wifiSsidInput"); if(document.activeElement!==si) si.value=NET.wifiSsid||"";
+  const pi=$("#wifiPassInput"); pi.placeholder=NET.wifiPassSet?"••••••••":"";
+  const ai=$("#apnInput"); if(document.activeElement!==ai) ai.value=NET.apn||"";
+  $("#netSaveBtn").onclick=()=>{ const patch={mode:NET.mode,wifiSsid:si.value,apn:ai.value}; if(pi.value)patch.wifiPass=pi.value;
+    saveNetwork(patch); pi.value=""; $("#netStatus").textContent=t("netSaved"); };
+  $("#netStatus").textContent = document.activeElement===$("#netSaveBtn")?$("#netStatus").textContent:(NET.wifiConnected?t("wifiConnected"):(NET.cellConnected?t("cellConnected"):""));
+}
+
+/* ---------- Bluetooth pairing (Truma panel) ---------- */
+const BLE={state:"idle",addr:""};
+let BLE_SCAN=[];
+async function loadBle(){ try{ const r=await fetch("/api/ble",{cache:"no-store",headers:authHeaders()}); if(r.ok){ Object.assign(BLE,await r.json()); } }catch(e){} }
+async function loadBleScan(){ try{ const r=await fetch("/api/ble/scan",{cache:"no-store",headers:authHeaders()}); if(r.ok){ BLE_SCAN=await r.json(); renderBle(); } }catch(e){} }
+async function bleScan(){ try{ await fetch("/api/ble/scan",{method:"POST",headers:authHeaders()}); }catch(e){} setTimeout(loadBleScan,2500); }
+async function blePair(addr){ try{ await fetch("/api/ble/pair",{method:"POST",headers:Object.assign({"Content-Type":"application/json"},authHeaders()),body:JSON.stringify({addr})}); }catch(e){}
+  setTimeout(async()=>{ await loadBle(); renderBle(); },1000); }
+async function bleForget(){ try{ await fetch("/api/ble/forget",{method:"POST",headers:authHeaders()}); }catch(e){}
+  setTimeout(async()=>{ await loadBle(); renderBle(); },1000); }
+function renderBle(){
+  $("#bleHead").textContent=t("bluetooth"); $("#bleStatusLabel").textContent=t("blePanel");
+  const stMap={idle:t("bleIdle"),scanning:t("bleScanning"),connecting:t("bleConnecting"),paired:t("blePaired")};
+  $("#bleStatusVal").textContent=(stMap[BLE.state]||BLE.state)+(BLE.addr?" ("+BLE.addr+")":"");
+  $("#bleScanBtn").textContent=t("bleScanBtn"); $("#bleScanBtn").onclick=()=>{ $("#bleScanBtn").textContent=t("bleScanning"); bleScan(); };
+  $("#bleForgetBtn").textContent=t("bleForgetBtn"); $("#bleForgetBtn").classList.toggle("hidden", !(BLE.state==="paired"||BLE.addr));
+  $("#bleForgetBtn").onclick=()=>bleForget();
+  const box=$("#bleList"); box.innerHTML="";
+  if(!BLE_SCAN.length){ const p=document.createElement("div"); p.className="muted"; p.style.cssText="font-size:.82rem;text-align:center;padding:8px 0"; p.textContent=t("bleNoneFound"); box.appendChild(p); }
+  for(const d of BLE_SCAN){ const row=document.createElement("div"); row.className="subrow"; row.style.cssText="display:flex;align-items:center;justify-content:space-between;gap:8px";
+    const lab=document.createElement("span"); lab.textContent=d.addr+" ("+d.rssi+" dBm)"+(d.isTarget?" ✓":"");
+    const btn=document.createElement("button"); btn.className="pill"; btn.textContent=t("blePairBtn"); btn.onclick=()=>blePair(d.addr);
+    row.appendChild(lab); row.appendChild(btn); box.appendChild(row); }
+}
+
+/* ---------- trend history + sparklines ---------- */
+const HISTORY={};
+async function loadHistory(key){
+  try{ const r=await fetch("/api/history?key="+encodeURIComponent(key),{headers:authHeaders()});
+    if(r.ok){ const j=await r.json(); if(j&&j.values&&j.values.length){ HISTORY[key]=j; return j.values; } } }catch(e){}
+  HISTORY[key]=synthHistory(key); return HISTORY[key].values;   // preview / no data yet
+}
+function synthHistory(key){
+  const p=key.split("."); let cur=50;
+  const f=ST&&ST.params?ST.params.find(x=>x.topic===p[0]&&x.param===p[1]):null; if(f)cur=f.value;
+  const n=48, vals=[];
+  if(/Temp/.test(key)){ for(let i=0;i<n;i++) vals.push(Math.round(cur+Math.sin(i/4)*12)); }
+  else { const start=Math.min(100,cur+35); for(let i=0;i<n;i++) vals.push(Math.round(start-(start-cur)*i/(n-1))); }
+  return {interval:1800,values:vals};
+}
+function sparkSVG(vals,color){
+  if(!vals||vals.length<2) return "";
+  const mn=Math.min.apply(null,vals),mx=Math.max.apply(null,vals),rng=(mx-mn)||1,n=vals.length;
+  const pts=vals.map((v,i)=>((i/(n-1))*100).toFixed(1)+","+(28-((v-mn)/rng)*24).toFixed(1)).join(" ");
+  return '<svg class="spark" viewBox="0 0 100 30" preserveAspectRatio="none"><polyline points="'+pts+'" fill="none" stroke="'+color+'" stroke-width="1.8" vector-effect="non-scaling-stroke"/></svg>';
+}
+function daysToEmpty(vals,interval){
+  if(!vals||vals.length<3) return null;
+  const first=vals[0], last=vals[vals.length-1], spanDays=(vals.length-1)*interval/86400, drop=first-last;
+  if(drop<=0||spanDays<=0) return null;
+  return last/(drop/spanDays);
+}
+function trendChart(vals,interval,color,fmt){
+  if(!vals||vals.length<2) return "";
+  const mn=Math.min.apply(null,vals),mx=Math.max.apply(null,vals),hours=Math.round((vals.length-1)*interval/3600);
+  return '<div class="trend">'+sparkSVG(vals,color)+'<div class="taxis"><span>-'+hours+' h</span><span>'+fmt(mn)+' – '+fmt(mx)+'</span><span>'+t("now")+'</span></div></div>';
+}
+
+/* ---------- page router + home overview grid ---------- */
+let PAGE="home";
+const PAGE_IDS=["climate","fan","energy","light","gas","status","timers","more"];
+const ICON={
+  fan:'<circle cx="12" cy="12" r="2"/><path d="M12 10c3-4 8-4 8 0 0 2-4 2-8 2M12 14c-3 4-8 4-8 0 0-2 4-2 8-2"/>',
+  energy:'<path d="M13 3 4 14h7l-1 7 9-11h-7z"/>',
+  light:'<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10c1 1 1 2 1 3h6c0-1 0-2 1-3a6 6 0 0 0-4-10z"/>',
+  gas:'<path d="M9 3h6v3l2 2v12a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V8l2-2z"/>',
+  status:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+  timers:'<circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/>',
+  water:'<path d="M12 3s6 7 6 11a6 6 0 0 1-12 0c0-4 6-11 6-11z"/>',
+  more:'<circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/>'
+};
+function pageTitleFor(p){ return {climate:t("climate"),fan:t("fan"),energy:t("waterEnergy"),light:t("ambientLight"),gas:t("gasBottle"),status:t("status"),timers:t("timers"),more:t("more")}[p]||""; }
+function showPage(p,noScroll){ PAGE=p;
+  $("#home").style.display = p==="home"?"":"none";
+  $("#pageTitle").classList.toggle("hidden", p==="home");
+  $("#back2").classList.toggle("hidden", p==="home");
+  for(const x of PAGE_IDS){ const el=$("#pg-"+x); if(el) el.classList.toggle("hidden", p!==x); }
+  if(p!=="home") $("#pageTitle").textContent=pageTitleFor(p);
+  if(p==="gas"&&ST){ (ST.gasLevels||[]).forEach(b=>loadHistory("LevelControl."+b.param).then(()=>{ if(PAGE==="gas") renderGas(); })); }
+  if(p==="climate"&&ST&&ST.cur){ loadHistory(ST.cur.topic+"."+ST.cur.param).then(()=>{ if(PAGE==="climate") renderClimate(); }); }
+  if(!noScroll) window.scrollTo(0,0);
+}
+function tile(page,icon,label,value,accent,sub){
+  const d=document.createElement("div"); d.className="tile"+(accent?" accent":"");
+  if(accent) d.style.setProperty("--accent",accent);
+  d.innerHTML='<div class="th"><svg viewBox="0 0 24 24">'+icon+'</svg><span>'+label+'</span></div><div><div class="tv">'+(value!=null?value:"")+'</div>'+(sub?'<div class="ts">'+sub+'</div>':'')+'</div>';
+  d.onclick=()=>showPage(page); return d;
+}
+function energyLabel(){ const src=curSource(), p=ST.elec&&ST.elec.value>0?powerName(ST.elec.value):"";
+  return src==="mix" ? t("gas")+" + "+p : src==="electric" ? t("electric")+" "+p : t("gas"); }
+function waterLabel(){ if(!ST.water) return null; const e=(ST.water.enum||[]).find(x=>x.value===ST.water.value);
+  const n=e?tLevel(e.name):String(ST.water.value); return /^\d+$/.test(n) ? n+" °C" : n; }
+const OVERVIEW={statusMetric:"battery",gasMetric:"bottle1",climateMetric:"setpoint"};
+try{ const o=JSON.parse(localStorage.getItem("trumax_overview")||"null"); if(o)Object.assign(OVERVIEW,o); }catch(e){}
+function saveOverview(patch){ Object.assign(OVERVIEW,patch); try{localStorage.setItem("trumax_overview",JSON.stringify(OVERVIEW));}catch(e){} if(ST)renderHome(); renderOverview(); }
+function renderOverview(){
+  $("#ovHead").textContent=t("overview"); $("#statusTileLabel").textContent=t("statusTile"); $("#gasTileLabel").textContent=t("gasTile");
+  $("#climTileLabel").textContent=t("climateTile");
+  const fill=(sel,opts,cur,on)=>{ const s=$(sel); s.innerHTML=""; opts.forEach(o=>{const op=document.createElement("option");op.value=o[0];op.textContent=o[1];if(cur===o[0])op.selected=true;s.appendChild(op);}); s.onchange=()=>on(s.value); };
+  fill("#statusMetricSel",[["battery",t("battery")],["fresh",t("freshWater")],["grey",t("greyWater")]],OVERVIEW.statusMetric,v=>saveOverview({statusMetric:v}));
+  fill("#climMetricSel",[["setpoint",t("setpoint")],["actual",t("actual")]],OVERVIEW.climateMetric,v=>saveOverview({climateMetric:v}));
+  fill("#gasMetricSel",[["bottle1",t("gasLevel")+" 1"],["bottle2",t("gasLevel")+" 2"],["total",t("gasTotal")]],OVERVIEW.gasMetric,v=>saveOverview({gasMetric:v}));
+}
+function renderHome(){ const g=$("#home"); g.className="grid"; g.innerHTML=""; if(!ST) return;
+  if(ST.climate){ const m=ST.climate.value, vent=m!==0&&isVentMode(m), vi=vent?ventInfo():null;
+    const act=ST.cur&&ST.cur.value!=null?fmtTemp(ST.cur.value,true):null, set=ST.tgt&&m!==0&&!vent?fmtTemp(ST.tgt.value,true):null;
+    const showAct=OVERVIEW.climateMetric==="actual";
+    const val = vi ? vi.v+" / "+vi.max : showAct ? (act||"—") : (set||"—");
+    const other = vi ? (act?t("now").toLowerCase()+" "+act:null) : showAct ? (set?t("target")+" "+set:null) : (act?t("now").toLowerCase()+" "+act:null);
+    const src = m!==0 && !vent && (ST.gas||ST.elec) ? energyLabel() : null;
+    const sub = [src,other].filter(Boolean).join(" · ")||null;
+    g.appendChild(tile("climate",(MODE[m]||MODE[0]).i, modeName(m)||t("off"), val, accentFor(m), sub)); }
+  if(ST.fan){ const e=(ST.fan.enum||[]).find(x=>x.value===ST.fan.value); g.appendChild(tile("fan",ICON.fan,t("fan"), e?tLevel(e.name):String(ST.fan.value))); }
+  if(ST.gas||ST.elec||ST.water){ const w=waterLabel();
+    const wc=ST.waterCur&&ST.waterCur.value!=null?t("now").toLowerCase()+" "+fmtTemp(ST.waterCur.value,true):null;
+    const sub=[w?energyLabel():null,wc].filter(Boolean).join(" · ")||null;
+    g.appendChild(tile("energy",ICON.water,t("waterEnergy"), w||energyLabel(), null, sub)); }
+  if((ST.gasLevels||[]).length){
+    let v,label=t("gasBottle");
+    if(OVERVIEW.gasMetric==="total"){ let kg=0; ST.gasLevels.forEach(b=>kg+=b.value/100*bottleFullKg(b.param)); v=num1(kg)+" kg"; label=t("gasTotal"); }
+    else { const i=OVERVIEW.gasMetric==="bottle2"?1:0; const b=ST.gasLevels[i]||ST.gasLevels[0]; v=b.value+" %"; label=t("gasLevel")+(ST.gasLevels.length>1?" "+(i+1):""); }
+    g.appendChild(tile("gas",ICON.gas,label,v));
+  }
+  if(ST.fresh||ST.grey||ST.batt){
+    let v="",label=t("status"),m=OVERVIEW.statusMetric;
+    if(m==="fresh"&&ST.fresh){v=ST.fresh.value+" %";label=t("freshWater");}
+    else if(m==="grey"&&ST.grey){v=ST.grey.value+" %";label=t("greyWater");}
+    else if(ST.batt){v=num1(ST.batt.value/10)+" V";label=t("battery");}
+    else if(ST.fresh){v=ST.fresh.value+" %";label=t("freshWater");}
+    else if(ST.grey){v=ST.grey.value+" %";label=t("greyWater");}
+    g.appendChild(tile("status",ICON.status,label,v));
+  }
+  if(ST.lightA){ g.appendChild(tile("light",ICON.light,t("ambientLight"), ST.lightA.value?t("on"):t("off"))); }
+  { const act=(ST.timers||[]).filter(x=>x.active).slice().sort((a,b)=>(a.start||"").localeCompare(b.start||""));
+    g.appendChild(tile("timers",ICON.timers,t("timers"), act.length?act[0].start:"—", null, act.length?null:t("noneActive"))); }
+  if((ST.rest||[]).length){ g.appendChild(tile("more",ICON.more,t("more"), String(ST.rest.length))); }
+}
+
+/* ---------- views ---------- */
+function renderMain(){ if(!ST)return; renderAlerts(); renderClimate(); renderFan(); renderEnergy(); renderLight(); renderGas(); renderStatus(); renderTimers(); renderAll(); renderHome(); showPage(PAGE,true);
+  setMoreLabel(); $("#footnote").textContent = "truma·x" + ((VERSION||UPD.version) ? "  v"+(VERSION||UPD.version) : ""); }
+function setMoreLabel(){ const sum=$("#moreLabel"); const chev=sum.querySelector(".chev"); sum.textContent=t("more")+" "; sum.appendChild(chev); }
+function renderAllViews(){ renderMain(); renderSettings(); }
+
+$("#gear").onclick=()=>{ $("#main").classList.add("hidden"); $("#settings").classList.remove("hidden"); window.scrollTo(0,0); renderRemote(); };
+$("#back").onclick=()=>{ $("#settings").classList.add("hidden"); $("#main").classList.remove("hidden"); window.scrollTo(0,0); };
+$("#back2").onclick=()=>showPage("home");
+$("#minus").onclick=()=>bump(-5); $("#plus").onclick=()=>bump(5);
+$("#loginBtn").onclick=doLogin; $("#loginToken").addEventListener("keydown",e=>{if(e.key==="Enter")doLogin();});
+
+/* dial drag */
+let dragging=false;
+function dragTo(ev){ if(!ST||!ST.climate||ST.climate.value===0)return; const box=$("#dial").getBoundingClientRect();
+  const cx=box.left+box.width/2,cy=box.top+box.height/2,pt=ev.touches?ev.touches[0]:ev;
+  let deg=Math.atan2(pt.clientY-cy,pt.clientX-cx)*180/Math.PI; deg=(deg+360)%360; let a=deg-135; if(a<0)a+=360; if(a>270)a=(a>315)?0:270;
+  const m=ST.climate.value, vi=isVentMode(m)?ventInfo():null;
+  if(vi){ const lv=Math.round(vi.min+a/270*(vi.max-vi.min)); ST.vent.value=lv; $("#tgt").textContent=String(lv); drawFrac((lv-vi.min)/Math.max(1,vi.max-vi.min)); return; }
+  const t2=Math.round((16+a/270*14)*2)*5; if(ST.tgt){ST.tgt.value=t2;TGT=t2;$("#tgt").textContent=fmtTemp(t2,false);drawArc(t2);} }
+(function(){ const d=$("#dial"); d.addEventListener("pointerdown",e=>{dragging=true;dragTo(e);e.preventDefault();}); window.addEventListener("pointermove",e=>{if(dragging)dragTo(e);}); window.addEventListener("pointerup",()=>{ if(!dragging) return; dragging=false;
+    const m=ST.climate?ST.climate.value:0;
+    if(m!==0&&isVentMode(m)&&ST.vent) post(ST.vent.topic,ST.vent.param,ST.vent.value);
+    else if(ST.tgt) post("RoomClimate","TgtTemp",ST.tgt.value); }); })();
+
+/* boot */
+let _lastState="", _lastSettings=0, _busy=false;
+async function refresh(full){
+  if(_busy) return; _busy=true;
+  try{
+    if(full || Date.now()-_lastSettings>60000){ await loadSettings(); await loadUpdate(); await loadNetwork(); await loadBle(); await loadRemote(); _lastSettings=Date.now(); full=true; }
+    const s=await loadState(); if(!s) return;
+    if(!REAL){ try{ const lt=JSON.parse(localStorage.getItem("trumax_timers")||"null"); if(lt) s.timers=lt; }catch(e){} }
+    const key=JSON.stringify(s);
+    if(!full && key===_lastState) return;          // nothing changed: don't re-render (no flicker)
+    _lastState=key;
+    ST=normalize(s.params); ST.devices=s.devices; ST.timers=s.timers;
+    if(full || !$("#settings").classList.contains("hidden")) renderAllViews(); else renderMain();
+  } finally { _busy=false; }
+}
+
+/* ---------- remote access: banner, toast, settings ---------- */
+function trxHost(u){ try{ return new URL(u).hostname; }catch(e){ return u||""; } }
+function trxRender(){
+  const bar=$("#trxBar"); if(!TRX||!bar) return;
+  let cls="", txt;
+  const c=TRX.client;
+  if(TRX.error){ cls="bad"; txt=t("rmBarErr"); }
+  else if(TRX.mismatch){ cls="warn"; txt=t(TRX.mismatch>1?"rmBarUpdApp":"rmBarUpdEsp"); }
+  else if(!TRX.status.connected){ cls="warn"; txt=t("rmBarNoBroker"); }
+  else if(!c||!c.stateTs){ txt=t("rmBarWait"); }
+  else if(c.isStale()){ cls="warn"; const d=new Date(c.stateTs*1000);
+    txt=t("rmBarOffline",{t:d.toLocaleString(CFG.lang,{weekday:"short",hour:"2-digit",minute:"2-digit"})}); }
+  else { txt=t("rmBarOn",{b:trxHost(TRX.status.url)})+(TRX.view?" · "+t("rmBarView"):""); }
+  bar.className="trxbar "+cls;
+  bar.innerHTML='<span></span><a href="'+TRX_LOCAL_URL+'"></a>';
+  bar.firstChild.textContent=txt; bar.lastChild.textContent=t("rmLocal");
+}
+let _toastT=null;
+function trxToast(msg){ let el=$("#trxToast"); if(!el){ el=document.createElement("div"); el.id="trxToast"; el.className="trxtoast"; document.body.appendChild(el); }
+  el.textContent=msg; el.style.display=""; clearTimeout(_toastT); _toastT=setTimeout(()=>{ el.style.display="none"; },4000); }
+if(TRX){ setInterval(trxRender,5000);
+  for(const id of ["#netSec","#bleSec","#fwSec","#secSec"]){ const e=$(id); if(e) e.classList.add("hidden"); }
+  const bn=$("#bleNameInput"); if(bn&&bn.closest(".card")) bn.closest(".card").classList.add("hidden"); }
+
+let RM={enabled:false,brokers:[],custom:"",link:"",viewLink:"",connected:false,broker:"",qr:false,known:{}}, RM_KIND="control", RM_LOADED=false;
+async function loadRemote(){ if(TRX) return; try{ const r=await fetch("/api/remote",{cache:"no-store",headers:authHeaders()}); if(r.ok){ RM=await r.json(); RM_LOADED=true; } }catch(e){} }
+async function saveRemote(patch,path){
+  try{ const r=await fetch(path||"/api/remote",{method:"POST",headers:Object.assign({"Content-Type":"application/json"},authHeaders()),body:JSON.stringify(patch||{})});
+    const j=await r.json(); if(r.ok) RM=j; else if(j.error) trxToastLocal(j.error); }catch(e){}
+  renderRemote(); }
+function trxToastLocal(m){ trxToast(m); }
+function renderRemote(){
+  $("#remoteHead").textContent=t("remote");
+  if(TRX){
+    $("#rmLocalCard").classList.add("hidden"); $("#rmRemoteCard").classList.remove("hidden");
+    $("#rmRemoteInfo").innerHTML=t("rmRemoteInfo",{kind:t(TRX.view?"rmView":"rmControl"),local:TRX_LOCAL_URL.replace(/^http:\/\/|\/$/g,"")});
+    const f=$("#rmForget"); f.textContent=t("rmForget");
+    f.onclick=()=>{ try{ localStorage.removeItem("trumax_link"); }catch(e){} location.href=location.pathname; };
+    return; }
+  if(!RM_LOADED){ $("#rmSec").classList.add("hidden"); return; }
+  $("#rmSec").classList.remove("hidden");
+  $("#rmEnableLabel").textContent=t("rmEnable");
+  const tg=$("#rmToggle"); tg.setAttribute("aria-pressed",!!RM.enabled); tg.onclick=()=>saveRemote({enabled:!RM.enabled});
+  $("#rmState").textContent=!RM.enabled?t("rmOff"):(RM.connected?t("rmConnectedTo",{b:RM.broker}):t("rmConnecting"));
+  $("#rmBody").classList.toggle("hidden",!RM.enabled);
+  $("#rmNote").textContent=t("rmNote");
+  if(!RM.enabled) return;
+  const kw=$("#rmKind"); kw.innerHTML="";
+  for(const [k,l] of [["control",t("rmControl")],["view",t("rmView")]]){ const b=document.createElement("button"); b.className="pill"; b.textContent=l;
+    b.setAttribute("aria-pressed",k===RM_KIND); b.onclick=()=>{ RM_KIND=k; renderRemote(); }; kw.appendChild(b); }
+  const link=RM_KIND==="view"?RM.viewLink:RM.link;
+  $("#rmLink").value=link;
+  const img=$("#rmQrImg"), qr=$("#rmQr");
+  if(RM.qr){ qr.classList.remove("hidden"); const src="/api/remote/qr.svg?view="+(RM_KIND==="view"?1:0)+"&k="+encodeURIComponent(link.slice(-8));
+    if(img.getAttribute("src")!==src) img.src=src; }
+  else { qr.classList.add("hidden"); $("#rmState").textContent+=" "+t("rmNoQr"); }
+  const cp=$("#rmCopy"); cp.textContent=t("rmCopy");
+  cp.onclick=async()=>{ try{ await navigator.clipboard.writeText(link); }catch(e){ const i=$("#rmLink"); i.select(); document.execCommand("copy"); } cp.textContent=t("rmCopied"); setTimeout(()=>cp.textContent=t("rmCopy"),1500); };
+  const sh=$("#rmShare"); sh.textContent=t("rmShare"); sh.classList.toggle("hidden",!navigator.share);
+  sh.onclick=()=>navigator.share({title:"truma-x",url:link}).catch(()=>{});
+  $("#rmBrokersLabel").textContent=t("rmBrokers");
+  const bw=$("#rmBrokers"); bw.innerHTML="";
+  const order=(RM.brokers||[]).filter(i=>i!=="custom"); const all=order.concat(Object.keys(RM.known||{}).filter(i=>!order.includes(i)));
+  all.forEach((id,ix)=>{ const on=order.includes(id), url=RM.known[id]||"", port=(url.match(/:(\d+)\//)||[])[1]||"443";
+    const row=document.createElement("div"); row.className="rmb";
+    row.innerHTML='<input type="checkbox"'+(on?" checked":"")+'><span class="nm"></span><button aria-label="up">↑</button>';
+    row.querySelector(".nm").textContent=trxHost(url)+(port!=="443"?"  ":"");
+    if(port!=="443"){ const sm=document.createElement("small"); sm.textContent=" · "+t("rmNot443"); row.querySelector(".nm").appendChild(sm); }
+    row.querySelector("input").onchange=(e)=>{ const n=e.target.checked?order.concat([id]):order.filter(x=>x!==id); if(n.length) saveRemote({brokers:n}); else renderRemote(); };
+    const up=row.querySelector("button"); up.style.visibility=(on&&order.indexOf(id)>0)?"visible":"hidden";
+    up.onclick=()=>{ const n=order.slice(), i=n.indexOf(id); [n[i-1],n[i]]=[n[i],n[i-1]]; saveRemote({brokers:n}); };
+    bw.appendChild(row); });
+  $("#rmCustomLabel").textContent=t("rmCustom");
+  const ci=$("#rmCustom"); if(document.activeElement!==ci) ci.value=RM.custom||"";
+  const warn=()=>{ const m=(ci.value.match(/^wss?:\/\/(?:[^@\/]*@)?[^:\/]+:(\d+)/)||[])[1]; const w=$("#rmPortWarn");
+    w.textContent=t("rmPortWarn"); w.classList.toggle("hidden",!ci.value||!m||m==="443"); };
+  warn(); ci.oninput=warn; ci.onchange=()=>saveRemote({custom:ci.value.trim()});
+  const nb=$("#rmNew"); nb.textContent=t("rmNew");
+  nb.onclick=()=>{ if(confirm(t("rmNewConfirm"))) saveRemote({}, "/api/remote/newkey"); };
+}
+
+/* ---------- home-screen icon: offline shell (only on https, e.g. GitHub Pages) ---------- */
+if("serviceWorker" in navigator && window.isSecureContext && location.protocol==="https:"){
+  navigator.serviceWorker.register("sw.js").catch(()=>{}); }
+
+document.documentElement.lang=CFG.lang;
+showPage("home"); refresh(true); setInterval(()=>{ if(editIdx<0 && !dragging && !document.hidden) refresh(false); },2000);
+
+/* ---------- preview data: Dave's system ---------- */
+const MOCK={ devices:[
+  {name:"iNet X Interface AC",type:10,serial:"IIIRTEU-A-11024589",fw:"3.5",addr:"0x0101",controllable:true},
+  {name:"Aventa comfort 2. G",type:3,serial:"AVRLWZZ-A-20731864",fw:"1.6",addr:"0x0801",controllable:true},
+  {name:"Combi 6 E",type:2,serial:"CBY06EU-F-36063191",fw:"2.0.1",addr:"0x0201",controllable:true},
+  {name:"BLE peripheral",type:0,serial:"—",fw:"1.0",addr:"0x0601",controllable:false}
+], params:[
+  {device:"iNet X Interface AC",topic:"RoomClimate",param:"Mode",writable:true,value:2,enum:[{name:"Off",value:0},{name:"Auto",value:1},{name:"Cool",value:2},{name:"Heat",value:4},{name:"Fan",value:5},{name:"Dry",value:6}]},
+  {device:"iNet X Interface AC",topic:"RoomClimate",param:"TgtTemp",writable:true,value:215,min:160,max:300},
+  {device:"Aventa comfort 2. G",topic:"AirCooling",param:"Temp",writable:false,value:236},
+  {device:"Aventa comfort 2. G",topic:"AirCooling",param:"Mode",writable:true,value:0,enum:[{name:"Auto",value:0},{name:"Low",value:1},{name:"Mid",value:2},{name:"High",value:3},{name:"Night",value:4}]},
+  {device:"Aventa comfort 2. G",topic:"AmbientLight",param:"Active",writable:true,value:1},
+  {device:"Aventa comfort 2. G",topic:"AmbientLight",param:"LightStep",writable:true,value:65,min:0,max:100},
+  {device:"Combi 6 E",topic:"WaterHeating",param:"Mode",writable:true,value:1,enum:[{name:"Off",value:0},{name:"Eco",value:1},{name:"High",value:2},{name:"Boost",value:3}]},
+  {device:"Combi 6 E",topic:"EnergySrc",param:"GasLevel",writable:true,value:1,enum:[{name:"Off",value:0},{name:"On",value:1}]},
+  {device:"Combi 6 E",topic:"EnergySrc",param:"ElectricLevel",writable:true,value:1,enum:[{name:"Off",value:0},{name:"900 W",value:1},{name:"1800 W",value:2}]},
+  {device:"Combi 6 E",topic:"EnergySrc",param:"EnergySourcePrio",writable:true,value:0,enum:[{name:"Gas",value:0},{name:"Electric",value:1}]},
+  {device:"iNet X Interface AC",topic:"Panel",param:"Intst",writable:true,value:80,min:10,max:100},
+  {device:"Combi 6 E",topic:"AirHeating",param:"Temp",writable:false,value:214},
+  {device:"Truma LevelControl",topic:"LevelControl",param:"Bottle1",writable:false,value:58},
+  {device:"Truma LevelControl",topic:"LevelControl",param:"Bottle2",writable:false,value:12},
+  {device:"Truma LevelControl",topic:"LevelControl",param:"ActiveBottle",writable:false,value:1,enum:[{name:"Bottle 1",value:1},{name:"Bottle 2",value:2}]},
+  {device:"Caravan",topic:"FreshWater",param:"Level",writable:false,value:78},
+  {device:"Caravan",topic:"GreyWater",param:"Level",writable:false,value:41},
+  {device:"Caravan",topic:"VBat",param:"Voltage",writable:false,value:126},
+  {device:"Combi 6 E",topic:"System",param:"Error",writable:false,value:0,enum:[{name:"None",value:0},{name:"Ignition failure",value:1}]},
+  {device:"Combi 6 E",topic:"System",param:"Warning",writable:false,value:1,enum:[{name:"None",value:0},{name:"Water level low",value:1},{name:"Frost warning",value:2}]}
+], timers:[
+  {id:1,active:true,start:"07:00",end:"09:00",temp:210},
+  {id:2,active:false,start:"17:00",end:"22:30",temp:215}
+]};
+</script>
+<script type="module">
+if (window.TRX) {
+  const TRX = window.TRX;
+  try {
+    if (!globalThis.crypto || !crypto.subtle) throw new Error("no WebCrypto (needs https)");
+    const { parseLink, RemoteClient } = await import("./truma_remote.js");   // only loaded in remote mode
+    const { keys, brokers } = await parseLink(TRX.link);
+    TRX.view = !keys.canCmd;
+    TRX.client = new RemoteClient(keys, brokers, {
+      onStatus: (s) => { TRX.status = s; trxRender(); },
+      onState: () => { TRX.mismatch = 0; trxRender(); },
+      onMismatch: (v) => { TRX.mismatch = v; trxRender(); },
+    }).start();
+    TRX._ready(TRX.client);
+  } catch (e) {
+    TRX.error = String(e && e.message || e);
+    TRX._ready({ fetch: async () => { throw new TypeError("remote unavailable"); } });
+  }
+  trxRender();
+}
+</script>
+</body>
+</html>
