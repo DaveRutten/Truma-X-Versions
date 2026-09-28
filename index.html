@@ -489,6 +489,7 @@
    every fetch("/api/...") then goes end-to-end encrypted over MQTT instead of HTTP.
    Opened from the ESP / bridge itself without such a link: plain local HTTP as before. */
 const TRX_LOCAL_URL="http://truma-x.local/";
+const APP_BUILD="8e4905a";   // filled in by publish-webapp.yml (short git commit)
 var TRX=(function(){          // var: the module script below reads window.TRX
   const hasKey=s=>/(^|&)(k|v)=/.test(s||"");
   const localHost=h=>!h||h==="localhost"||h.endsWith(".local")||h.startsWith("[")||
@@ -1686,7 +1687,7 @@ function renderHome(){ const g=$("#home"); g.className="grid"; g.innerHTML=""; i
 function renderMain(){ if(!ST)return; renderAlerts(); renderClimate(); renderFan(); renderEnergy(); renderLight(); renderGas(); renderStatus(); renderTimers(); renderAll(); renderHome(); showPage(PAGE,true);
   setMoreLabel(); renderFoot(); }
 function renderFoot(){
-  const v=VERSION||UPD.version; $("#footnote").textContent="truma·x"+(v?"  v"+v:"");
+  const v=VERSION||UPD.version; $("#footnote").textContent="truma·x"+(v?"  v"+v:"")+(APP_BUILD.startsWith("__")?"":"  ·  app "+APP_BUILD);
   const box=$("#footUpd");
   if(!UPD.available||!UPD.latest){ box.classList.add("hidden"); return; }
   box.classList.remove("hidden"); box.innerHTML='<span></span>';

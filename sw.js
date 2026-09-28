@@ -3,7 +3,7 @@
 //   developer always sees the latest files). /api/* and MQTT never touch it.
 // - Web Push: shows the notifications truma-x sends (faults, gas low, panel lost, test).
 // The remote key stays in the URL fragment / localStorage; the worker never sees it.
-const CACHE = "truma-x-v3";
+const CACHE = "truma-x-v4";
 const DEV = ["localhost", "127.0.0.1"].includes(self.location.hostname);
 const SHELL = ["./", "index.html", "truma_remote.js", "truma_mqtt.js", "manifest.webmanifest",
                "icon.svg", "icon-192.png", "icon-512.png", "apple-touch-icon.png"];
@@ -17,10 +17,16 @@ self.addEventListener("activate", (e) => {
 self.addEventListener("fetch", (e) => {
   const u = new URL(e.request.url);
   if (DEV || e.request.method !== "GET" || u.origin !== location.origin || u.pathname.includes("/api/")) return;
+  const page = e.request.mode === "navigate" || /\/(index\.html)?$/.test(u.pathname) || u.pathname.endsWith(".js");
   e.respondWith(caches.open(CACHE).then(async (c) => {
     const hit = await c.match(e.request, { ignoreSearch: true });
-    const net = fetch(e.request).then((r) => { if (r.ok) c.put(e.request, r.clone()); return r; }).catch(() => hit);
-    return hit || net;
+    const net = fetch(e.request, { cache: "no-cache" }).then((r) => { if (r.ok) c.put(e.request, r.clone()); return r; });
+    if (page) {                      // page + scripts: network first (updates show at once), cache when offline
+      const slow = new Promise((res) => setTimeout(() => res(null), 3500));
+      try { const r = await Promise.race([net, slow]); if (r) return r; } catch (err) {}
+      return hit || net;
+    }
+    return hit || net.catch(() => hit);   // icons etc.: cache first, refreshed in the background
   }));
 });
 self.addEventListener("push", (e) => {
