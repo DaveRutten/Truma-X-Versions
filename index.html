@@ -41,6 +41,9 @@
   .status.mock .dot{background:#f0a022;box-shadow:0 0 0 4px #f0a02222}
   .status.bad .dot{background:#e23b3b}
   .iconbtn{background:none;border:none;color:#33507e;cursor:pointer;padding:4px;display:grid;place-items:center}
+  #gear{border-radius:10px;padding:6px;transition:background .15s,transform .3s}
+  #gear:hover{background:#e9eef8}
+  #gear:active{transform:rotate(30deg)}
   .iconbtn svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8}
 
   .dial{position:relative;width:280px;height:280px;margin:6px auto 8px;touch-action:none;user-select:none}
@@ -119,7 +122,7 @@
   .settabs button{flex:none;padding:9px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--muted);font-size:.84rem;cursor:pointer;white-space:nowrap}
   .settabs button[aria-selected="true"]{color:#0b1017;background:var(--accent);border-color:var(--accent);font-weight:600}
   #settings .sec.tabhide{display:none !important}
-  .psearch{width:100%;background:var(--surface2);color:var(--fg);border:1px solid var(--line);border-radius:11px;padding:11px 12px;font-size:.9rem;margin-bottom:12px}
+  .psearch{display:block;width:100%;background:var(--surface2);color:var(--fg);border:1px solid var(--line);border-radius:11px;padding:11px 12px;font-size:.9rem;margin-bottom:12px}
   details.ptopic{border-top:1px solid var(--line)}
   details.ptopic:first-of-type{border-top:none}
   details.ptopic>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:8px;padding:12px 2px;font-size:.9rem;font-weight:600}
@@ -128,6 +131,14 @@
   details.ptopic>summary .chev{margin-left:auto;transition:.2s;color:var(--muted)}
   details.ptopic[open]>summary .chev{transform:rotate(180deg)}
   details.ptopic .psub{color:var(--muted);font-size:.68rem;letter-spacing:.05em;text-transform:uppercase;margin:6px 2px 0}
+  .prow .vchip{min-width:96px;text-align:center;padding:8px 12px;border-radius:9px;background:var(--surface2);border:1px solid var(--line);
+    color:var(--fg);font-size:.85rem;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .prow .vchip.ok{color:#5fd49a;border-color:#2bb67366;background:#2bb67318}
+  .prow .vchip.warn{color:#f3c77a;border-color:#f0a02266;background:#f0a02214}
+  .prow .vchip.bad{color:#f39b9b;border-color:#e23b3b66;background:#e23b3b18}
+  .prow .vchip.off{color:var(--muted)}
+  #allParams .prow select,#allParams .prow input[type=number]{min-width:96px}
+  #allParams .pdev{break-inside:avoid;display:inline-block;width:100%}
   .prow .k code{display:block;color:var(--muted);font-size:.66rem;margin-top:3px;font-family:ui-monospace,Menlo,monospace;opacity:.8}
   .logday{color:var(--muted);font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;margin:16px 2px 4px}
   .logrow{display:flex;align-items:flex-start;gap:10px;padding:10px 2px;border-bottom:1px solid var(--line)}
@@ -190,6 +201,10 @@
   .tile .th svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.8;flex:none}
   .tile.accent .th{color:var(--accent)}
   .tile .tv{font-family:"Space Grotesk";font-weight:600;font-size:1.5rem;line-height:1;margin-top:10px}
+  .tstat{display:grid;grid-template-columns:1fr auto;gap:5px 10px;margin-top:10px;font-size:.84rem;align-items:baseline}
+  .tstat span{color:var(--muted)}
+  .tstat b{font-family:"Space Grotesk";font-weight:600;font-size:1.05rem;font-variant-numeric:tabular-nums;text-align:right}
+  .tstat b.warn{color:#f3c77a}
   .tile .ts{color:var(--muted);font-size:.78rem;margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .pagetitle{font-family:"Space Grotesk";font-weight:600;font-size:1.15rem;margin:2px 2px 14px}
   .spark{width:100%;height:46px;display:block;margin-top:10px}
@@ -207,17 +222,17 @@
     .page.split:not(.hidden){display:grid;grid-template-columns:minmax(300px,1fr) minmax(0,1.1fr);gap:0 28px;align-items:start}
     .page.split .pmain{position:sticky;top:16px}
     .page.split .pside{padding-top:18px}
-    #settings:not(.hidden){column-count:2;column-gap:18px}
-    #settings>.topbar,#settings>.settabs{column-span:all}
-    #settings>.sec{break-inside:avoid;display:inline-block;width:100%}
+    #setGrid{display:flex;gap:18px;align-items:flex-start}
+    #setGrid>.setcol{flex:1 1 0;min-width:0}
     .trxbar{margin-top:-4px}
   }
   @media (min-width:1100px){
+    #allParams .pcols{display:grid;grid-template-columns:repeat(auto-fit,minmax(440px,1fr));gap:0 18px;align-items:start}
     .wrap{max-width:1120px}
     .grid{grid-template-columns:repeat(4,minmax(0,1fr))}
     .dial{width:320px;height:320px}
     .temp{font-size:4.6rem}
-    #settings:not(.hidden){column-count:3}
+
   }
 </style>
 </head>
@@ -232,7 +247,7 @@
       <div class="right">
         <div class="status" id="status"><span class="dot"></span><span id="statustext"></span></div>
         <button class="iconbtn" id="gear" aria-label="Settings">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 0 1-4 0v-.1A1.6 1.6 0 0 0 7 19.4a1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0-1.1-2.7H1a2 2 0 0 1 0-4h.1A1.6 1.6 0 0 0 2.6 7a1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.6 1.6 0 0 0 7 2.6h.1A1.6 1.6 0 0 0 8 1.1V1a2 2 0 0 1 4 0v.1A1.6 1.6 0 0 0 15 2.6a1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8V7a1.6 1.6 0 0 0 1.5 1H23a2 2 0 0 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M19.15 10.10 L21.86 10.31 L21.86 13.69 L19.15 13.90 L18.40 15.71 L20.17 17.77 L17.77 20.17 L15.71 18.40 L13.90 19.15 L13.69 21.86 L10.31 21.86 L10.10 19.15 L8.29 18.40 L6.23 20.17 L3.83 17.77 L5.60 15.71 L4.85 13.90 L2.14 13.69 L2.14 10.31 L4.85 10.10 L5.60 8.29 L3.83 6.23 L6.23 3.83 L8.29 5.60 L10.10 4.85 L10.31 2.14 L13.69 2.14 L13.90 4.85 L15.71 5.60 L17.77 3.83 L20.17 6.23 L18.40 8.29 Z"/><circle cx="12" cy="12" r="3"/></svg>
         </button>
       </div>
     </div>
@@ -430,6 +445,15 @@
       </div>
     </div>
 
+    <div data-tab="notify" class="sec" id="pushSec"><h2 id="pushHead"></h2>
+      <div class="card">
+        <div class="lightrow"><span id="pushLabel"></span><div class="toggle" id="pushToggle" role="switch" aria-pressed="false"></div></div>
+        <div id="pushState" class="muted" style="font-size:.82rem;line-height:1.5;min-height:1em"></div>
+        <button class="pill hidden" id="pushTest" style="width:100%;margin-top:12px"></button>
+        <div class="subrow hidden" id="pushDevRow" style="margin-top:14px"><label id="pushDevLabel"></label><div id="pushDevs"></div></div>
+        <div class="info" id="pushNote" style="margin-top:12px;border:none;padding:0;background:none"></div>
+      </div>
+    </div>
     <div data-tab="notify" class="sec"><h2 id="notifHead"></h2>
       <div class="card">
         <div class="lightrow"><span id="notifOnLabel"></span><div class="toggle" id="notifToggle" role="switch" aria-pressed="false"></div></div>
@@ -721,6 +745,34 @@ const FOOT_T={
   es:{updLocalOnly:"se instala desde la página del ESP",updConfirm:"¿Actualizar truma-x a v{v}? El dispositivo se reinicia después (≈ 1 minuto)."}
 };
 for(const k in FOOT_T) Object.assign(T[k],FOOT_T[k]);
+
+const PUSH_T={
+  nl:{pushHead:"Pushmeldingen",pushLabel:"Meldingen op dit toestel",pushOn:"Aan: je krijgt een melding bij een storing of waarschuwing, als het gas bijna op is en als de verbinding met het paneel wegvalt.",
+    pushOff:"Uit.",pushDenied:"Meldingen zijn geblokkeerd. Sta ze toe in de instellingen van je telefoon of browser en probeer opnieuw.",
+    pushNeedHome:"Zet de app eerst op je beginscherm (Delen → Zet op beginscherm) en open hem via het icoon. Op een iPhone is iOS 16.4 of nieuwer nodig.",
+    pushNoSupport:"Deze browser ondersteunt geen pushmeldingen.",pushViaApp:"Pushmeldingen zet je aan in de app op je beginscherm, of hier op de pc via http://localhost.",
+    pushView:"Met een kijk-link kun je geen meldingen aanzetten; gebruik de bedien-link.",pushTest:"Testmelding sturen",pushSent:"Testmelding verstuurd",
+    pushFail:"Aanzetten lukte niet: {e}",pushDevices:"Toestellen met meldingen",pushThis:"dit toestel",pushWorking:"Bezig…",
+    pushNote:"Meldingen gaan versleuteld rechtstreeks van truma-x naar de pushdienst van Apple of Google. Er zit geen eigen server tussen.",
+    evPushOn:"Pushmeldingen aangezet",evPushOff:"Pushmeldingen uitgezet"},
+  en:{pushHead:"Push notifications",pushLabel:"Notifications on this device",pushOn:"On: you get a notification for faults or warnings, when gas runs low and when the connection to the panel drops.",
+    pushOff:"Off.",pushDenied:"Notifications are blocked. Allow them in your phone or browser settings and try again.",
+    pushNeedHome:"First add the app to your home screen (Share → Add to Home Screen) and open it from the icon. iPhone needs iOS 16.4 or later.",
+    pushNoSupport:"This browser doesn't support push notifications.",pushViaApp:"Switch notifications on in the home-screen app, or here on the PC via http://localhost.",
+    pushView:"A view link can't switch on notifications; use the control link.",pushTest:"Send test notification",pushSent:"Test notification sent",
+    pushFail:"Couldn't switch on: {e}",pushDevices:"Devices with notifications",pushThis:"this device",pushWorking:"Working…",
+    pushNote:"Notifications go encrypted straight from truma-x to Apple's or Google's push service. There is no server of our own in between.",
+    evPushOn:"Push notifications switched on",evPushOff:"Push notifications switched off"},
+  de:{pushHead:"Push-Mitteilungen",pushLabel:"Mitteilungen auf diesem Gerät",pushOn:"An: Mitteilung bei Störung oder Warnung, wenn das Gas knapp wird und wenn die Verbindung zum Panel abbricht.",
+    pushOff:"Aus.",pushDenied:"Mitteilungen sind blockiert. Erlaube sie in den Einstellungen von Handy oder Browser und versuche es erneut.",
+    pushNeedHome:"Lege die App zuerst auf den Home-Bildschirm (Teilen → Zum Home-Bildschirm) und öffne sie über das Symbol. iPhone braucht iOS 16.4 oder neuer.",
+    pushNoSupport:"Dieser Browser unterstützt keine Push-Mitteilungen.",pushViaApp:"Mitteilungen schaltest du in der App auf dem Home-Bildschirm ein oder hier am PC über http://localhost.",
+    pushView:"Mit einem Ansichts-Link lassen sich keine Mitteilungen einschalten; nutze den Steuer-Link.",pushTest:"Testmitteilung senden",pushSent:"Testmitteilung gesendet",
+    pushFail:"Einschalten fehlgeschlagen: {e}",pushDevices:"Geräte mit Mitteilungen",pushThis:"dieses Gerät",pushWorking:"Einen Moment…",
+    pushNote:"Mitteilungen gehen verschlüsselt direkt von truma-x an den Push-Dienst von Apple oder Google. Kein eigener Server dazwischen.",
+    evPushOn:"Push-Mitteilungen eingeschaltet",evPushOff:"Push-Mitteilungen ausgeschaltet"}
+};
+for(const k in PUSH_T) Object.assign(T[k],PUSH_T[k]);
 // Truma fault / warning texts as the appliances report them
 const FAULT_L={
   nl:{"None":"Geen","Frost warning":"Vorstwaarschuwing","Water level low":"Waterniveau laag","Ignition failure":"Ontstekingsstoring",
@@ -754,7 +806,27 @@ function renderTabs(){
     b.setAttribute("aria-selected",id===SET_TAB); b.onclick=()=>{ SET_TAB=id; try{localStorage.setItem("trumax_tab",id);}catch(e){} renderTabs(); window.scrollTo(0,0); };
     bar.appendChild(b); }
   for(const x of secs) x.classList.toggle("tabhide", x.dataset.tab!==SET_TAB);
+  layoutSettings();
 }
+// Masonry: spread the visible sections over as many columns as fit, each into the
+// currently shortest column, so a tall block never leaves a gap under a short one.
+function layoutSettings(){
+  const host=$("#settings"); if(host.classList.contains("hidden")) return;
+  let grid=$("#setGrid"); if(!grid){ grid=document.createElement("div"); grid.id="setGrid"; host.appendChild(grid); }
+  const secs=[...host.querySelectorAll(".sec[data-tab]")];
+  const vis=secs.filter(x=>!x.classList.contains("hidden")&&!x.classList.contains("tabhide"));
+  const w=grid.clientWidth||host.clientWidth;
+  const n=window.innerWidth<720?1:Math.max(1,Math.min(vis.length,Math.floor((w+18)/(330+18))));
+  // same tab, same columns, same blocks: keep every block where it is (no jumping on refresh)
+  const sig=n+"|"+vis.map(x=>x.querySelector("h2").id).join(",");
+  if(grid.dataset.sig===sig && grid.children.length===n) return;
+  grid.dataset.sig=sig;
+  grid.innerHTML=""; const cols=[];
+  for(let i=0;i<n;i++){ const c=document.createElement("div"); c.className="setcol"; grid.appendChild(c); cols.push(c); }
+  for(const x of vis){ const c=cols.reduce((a,b)=>b.offsetHeight<a.offsetHeight?b:a); c.appendChild(x); }
+  for(const x of secs) if(!vis.includes(x)) cols[0].appendChild(x);    // hidden ones, kept in the DOM
+}
+let _layT=null; window.addEventListener("resize",()=>{ clearTimeout(_layT); _layT=setTimeout(layoutSettings,150); });
 
 const LOGIN_T={
   nl:{loginTitle:"Vergrendeld",loginDesc:"Voer je toegangscode in om verder te gaan."},
@@ -1119,14 +1191,16 @@ function renderAll(){ const box=$("#allParams"); box.innerHTML="";
   const q=document.createElement("input"); q.className="psearch"; q.type="search"; q.placeholder=t("pSearch"); q.value=PSEARCH;
   q.oninput=()=>{ PSEARCH=q.value; const pos=q.selectionStart; renderAll(); const n=$("#allParams .psearch"); n.focus(); n.setSelectionRange(pos,pos); };
   box.appendChild(q);
+  const cols=document.createElement("div"); cols.className="pcols"; box.appendChild(cols);
   const ql=PSEARCH.trim().toLowerCase();
   const match=p=>!ql||[paramName(p),tName(p.topic),p.topic,p.param,p.device||""].some(x=>String(x).toLowerCase().includes(ql));
   const byDev={};
   for(const p of ST.rest){ if(!match(p)) continue; (byDev[p.device||"device"]=byDev[p.device||"device"]||[]).push(p); }
   const chev='<svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>';
   for(const dev of Object.keys(byDev)){
-    const h=document.createElement("div"); h.className="devname"; h.textContent=dev; box.appendChild(h);
-    const card=document.createElement("div"); card.className="card"; card.style.padding="4px 16px"; box.appendChild(card);
+    const wrapD=document.createElement("div"); wrapD.className="pdev"; cols.appendChild(wrapD);
+    const h=document.createElement("div"); h.className="devname"; h.textContent=dev; wrapD.appendChild(h);
+    const card=document.createElement("div"); card.className="card"; card.style.padding="4px 16px"; wrapD.appendChild(card);
     const tech=[], byTopic={};
     for(const p of byDev[dev]){ if(!p.writable&&TECH_RE.test(p.param)) tech.push(p); else (byTopic[p.topic]=byTopic[p.topic]||[]).push(p); }
     const topics=Object.keys(byTopic).sort((a,b)=>(byTopic[b].some(p=>p.writable)-byTopic[a].some(p=>p.writable))||tName(a).localeCompare(tName(b)));
@@ -1147,13 +1221,18 @@ function renderAll(){ const box=$("#allParams"); box.innerHTML="";
 function prow(p){ const row=document.createElement("div"); row.className="prow";
   const k=document.createElement("div"); k.className="k"; k.textContent=paramName(p);
   const c=document.createElement("code"); c.textContent=p.topic+"."+p.param; k.appendChild(c); row.appendChild(k);
-  if(!p.writable){ const v=document.createElement("div"); v.className="val"; v.textContent=fmtVal(p); row.appendChild(v); return row; }
+  if(!p.writable){ const v=document.createElement("div"); v.className="val vchip "+valState(p); v.textContent=fmtVal(p); row.appendChild(v); return row; }
   let inp; if(p.enum&&p.enum.length){ inp=document.createElement("select"); for(const e of p.enum){const o=document.createElement("option");o.value=e.value;o.textContent=tLevel(e.name);if(e.value===p.value)o.selected=true;inp.appendChild(o);} }
   else { inp=document.createElement("input"); inp.type="number"; if(p.min!=null)inp.min=p.min; if(p.max!=null)inp.max=p.max; inp.value=p.value; }
   inp.onchange=()=>post(p.topic,p.param,Number(inp.value)); row.appendChild(inp); return row; }
+function valState(p){
+  if(p.param==="Active") return ["off","ok","warn"][p.value]||"off";
+  if(/Error|Fault/.test(p.param)) return p.value?"bad":"ok";
+  if(/Warning/.test(p.param)) return p.value?"warn":"ok";
+  return ""; }
 function fmtVal(p){ if(p.enum){const e=p.enum.find(e=>e.value===p.value); if(e)return tLevel(e.name);}
-  if(p.param==="Active"&&/^(Air|Water|RoomClimate)/.test(p.topic)) return t(["loopOff","loopActive","loopIdle"][p.value]||"loopOff");
-  if(isTempParam(p)||(p.topic==="Temperature"&&typeof p.value==="number"&&Math.abs(p.value)<1000)) return fmtTemp(p.value,true);
+  if(p.param==="Active") return t(["loopOff","loopActive","loopIdle"][p.value]||"loopOff");
+  if(isTempParam(p)||(p.topic==="Temperature"&&!TECH_RE.test(p.param)&&typeof p.value==="number"&&Math.abs(p.value)<1000)) return fmtTemp(p.value,true);
   if(p.param==="Vcc12"||/mV$/.test(p.param)) return num1(p.value/1000)+" V";
   if(p.topic==="VBat"&&p.param==="Voltage") return num1(p.value/10)+" V";
   if(/Level$/.test(p.param)&&/Water|LevelControl/.test(p.topic)) return p.value+" %";
@@ -1299,6 +1378,7 @@ function renderSettings(){
   renderSecurity();
   renderNetwork();
   renderBle();
+  renderPush();
   renderTabs();
 }
 
@@ -1580,13 +1660,17 @@ function renderHome(){ const g=$("#home"); g.className="grid"; g.innerHTML=""; i
     g.appendChild(tile("gas",ICON.gas,label,v));
   }
   if(ST.fresh||ST.grey||ST.batt){
-    let v="",label=t("status"),m=OVERVIEW.statusMetric;
-    if(m==="fresh"&&ST.fresh){v=ST.fresh.value+" %";label=t("freshWater");}
-    else if(m==="grey"&&ST.grey){v=ST.grey.value+" %";label=t("greyWater");}
-    else if(ST.batt){v=num1(ST.batt.value/10)+" V";label=t("battery");}
-    else if(ST.fresh){v=ST.fresh.value+" %";label=t("freshWater");}
-    else if(ST.grey){v=ST.grey.value+" %";label=t("greyWater");}
-    g.appendChild(tile("status",ICON.status,label,v));
+    // one tile for battery, fresh and grey water; the metric chosen in Settings goes first
+    const rows=[];
+    if(ST.batt) rows.push(["battery",t("battery"),num1(ST.batt.value/10)+" V",ST.batt.value<118]);
+    if(ST.fresh) rows.push(["fresh",t("freshWater"),ST.fresh.value+" %",ST.fresh.value<=(NOTIFY.waterMin||15)]);
+    if(ST.grey) rows.push(["grey",t("greyWater"),ST.grey.value+" %",ST.grey.value>=(NOTIFY.greyMax||85)]);
+    rows.sort((a,b)=>(b[0]===OVERVIEW.statusMetric)-(a[0]===OVERVIEW.statusMetric));
+    const tl=tile("status",ICON.status,t("status"),null);
+    const box=document.createElement("div"); box.className="tstat";
+    for(const [,l,v,w] of rows){ const a=document.createElement("span"); a.textContent=l; const b=document.createElement("b"); b.textContent=v; if(w) b.className="warn"; box.append(a,b); }
+    const tv=tl.querySelector(".tv"); tv.replaceWith(box);
+    g.appendChild(tl);
   }
   if(ST.lightA){ g.appendChild(tile("light",ICON.light,t("ambientLight"), ST.lightA.value?t("on"):t("off"))); }
   { const act=(ST.timers||[]).filter(x=>x.active).slice().sort((a,b)=>(a.start||"").localeCompare(b.start||""));
@@ -1614,7 +1698,7 @@ function renderFoot(){
 function setMoreLabel(){ const sum=$("#moreLabel"); const chev=sum.querySelector(".chev"); sum.textContent=t("more")+" "; sum.appendChild(chev); }
 function renderAllViews(){ renderMain(); renderSettings(); }
 
-$("#gear").onclick=()=>{ $("#main").classList.add("hidden"); $("#settings").classList.remove("hidden"); window.scrollTo(0,0); renderRemote(); renderTabs(); };
+$("#gear").onclick=()=>{ $("#main").classList.add("hidden"); $("#settings").classList.remove("hidden"); window.scrollTo(0,0); renderRemote(); renderTabs(); loadPush(); };
 $("#back").onclick=()=>{ $("#settings").classList.add("hidden"); $("#main").classList.remove("hidden"); window.scrollTo(0,0); };
 $("#back2").onclick=()=>showPage("home");
 holdRepeat($("#minus"),()=>bump(-5)); holdRepeat($("#plus"),()=>bump(5));
@@ -1696,6 +1780,8 @@ function logText(e){
     case "remote_on": return {main:t("evRemoteOn"), sub:"", dot:"conn"};
     case "remote_off": return {main:t("evRemoteOff"), sub:"", dot:"conn"};
     case "newkey": return {main:t("evNewKey"), sub:"", dot:"warn"};
+    case "push_on": return {main:t("evPushOn"), sub:e.dev||"", dot:"conn"};
+    case "push_off": return {main:t("evPushOff"), sub:"", dot:"conn"};
   }
   return {main:e.ev, sub:"", dot:"conn"}; }
 async function loadLog(reset){
@@ -1724,6 +1810,66 @@ function renderLog(){
   const mb=$("#logMoreBtn"); mb.textContent=t("logMore"); mb.classList.toggle("hidden",!LOGB.more); mb.onclick=()=>loadLog(false);
 }
 setInterval(()=>{ if(PAGE==="log"&&!document.hidden) loadLog(true); },5000);
+
+
+/* ---------- push notifications (Web Push to this device) ---------- */
+const PUSHST={server:null,sub:null,busy:false,msg:""};
+const pushSupported=()=>("serviceWorker" in navigator)&&("PushManager" in window)&&("Notification" in window)&&window.isSecureContext;
+const isStandalone=()=>window.matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;
+const isIOS=()=>/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+function deviceName(){ const u=navigator.userAgent;
+  const dev=/iPhone/.test(u)?"iPhone":/iPad/.test(u)||(isIOS()&&!/iPhone/.test(u))?"iPad":/Android/.test(u)?"Android":/Windows/.test(u)?"Windows":/Mac/.test(u)?"Mac":"Browser";
+  const br=/Edg\//.test(u)?"Edge":/Firefox\//.test(u)?"Firefox":/CriOS|Chrome\//.test(u)?"Chrome":/Safari\//.test(u)?"Safari":"";
+  return dev+(br&&!(isIOS()&&isStandalone())?" · "+br:isStandalone()?" · app":""); }
+function b64uToBytes(s){ const b=atob(s.replace(/-/g,"+").replace(/_/g,"/")+"===".slice((s.length+3)%4)); return Uint8Array.from(b,c=>c.charCodeAt(0)); }
+async function loadPush(){
+  try{ const r=await fetch("/api/push",{cache:"no-store",headers:authHeaders()}); PUSHST.server=r.ok?await r.json():null; }catch(e){ PUSHST.server=null; }
+  if(pushSupported()){ try{ const reg=await navigator.serviceWorker.getRegistration(); PUSHST.sub=reg?await reg.pushManager.getSubscription():null; }catch(e){} }
+  renderPush(); }
+async function pushEnable(){
+  PUSHST.busy=true; PUSHST.msg=t("pushWorking"); renderPush();
+  try{
+    const perm=await Notification.requestPermission(); if(perm!=="granted") throw new Error("denied");
+    const reg=await navigator.serviceWorker.ready;
+    let sub=await reg.pushManager.getSubscription();
+    const key=b64uToBytes(PUSHST.server.key);
+    if(sub&&sub.options&&sub.options.applicationServerKey){      // subscribed to another truma-x? start over
+      const cur=new Uint8Array(sub.options.applicationServerKey); if(cur.join()!==key.join()){ await sub.unsubscribe(); sub=null; } }
+    if(!sub) sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:key});
+    const r=await fetch("/api/push/subscribe",{method:"POST",headers:Object.assign({"Content-Type":"application/json"},authHeaders()),
+      body:JSON.stringify({sub:sub.toJSON(),name:deviceName(),lang:CFG.lang})});
+    if(!r.ok) throw new Error("HTTP "+r.status);
+    PUSHST.server.devices=(await r.json()).devices; PUSHST.sub=sub; PUSHST.msg="";
+  }catch(e){ PUSHST.msg=e.message==="denied"?t("pushDenied"):t("pushFail",{e:e.message}); }
+  PUSHST.busy=false; renderPush(); }
+async function pushDisable(){
+  PUSHST.busy=true; renderPush();
+  try{ const ep=PUSHST.sub&&PUSHST.sub.endpoint; if(PUSHST.sub) await PUSHST.sub.unsubscribe(); PUSHST.sub=null;
+    const r=await fetch("/api/push/unsubscribe",{method:"POST",headers:Object.assign({"Content-Type":"application/json"},authHeaders()),body:JSON.stringify({endpoint:ep})});
+    if(r.ok) PUSHST.server.devices=(await r.json()).devices; PUSHST.msg=""; }catch(e){}
+  PUSHST.busy=false; renderPush(); }
+function renderPush(){
+  $("#pushHead").textContent=t("pushHead"); $("#pushLabel").textContent=t("pushLabel"); $("#pushNote").textContent=t("pushNote");
+  const tg=$("#pushToggle"), st=$("#pushState"), test=$("#pushTest"), devRow=$("#pushDevRow");
+  const on=!!PUSHST.sub; tg.setAttribute("aria-pressed",on);
+  let why=null;
+  if(TRX&&TRX.view) why=t("pushView");
+  else if(!pushSupported()) why=isIOS()&&!isStandalone()?t("pushNeedHome"):(!window.isSecureContext?t("pushViaApp"):t("pushNoSupport"));
+  else if(isIOS()&&!isStandalone()) why=t("pushNeedHome");
+  else if(!PUSHST.server) why=t("pushNoSupport");
+  else if(Notification.permission==="denied") why=t("pushDenied");
+  tg.style.opacity=why?.4:1; tg.onclick=()=>{ if(why||PUSHST.busy) return; on?pushDisable():pushEnable(); };
+  st.textContent=PUSHST.msg||why||(on?t("pushOn"):t("pushOff"));
+  test.textContent=t("pushTest"); test.classList.toggle("hidden",!on||!!why);
+  test.onclick=async()=>{ try{ const r=await fetch("/api/push/test",{method:"POST",headers:Object.assign({"Content-Type":"application/json"},authHeaders()),body:JSON.stringify({endpoint:PUSHST.sub.endpoint})});
+    const j=await r.json(); trxToast(j.sent?t("pushSent"):t("pushFail",{e:"0"})); }catch(e){ trxToast(t("pushFail",{e:e.message})); } };
+  const devs=(PUSHST.server&&PUSHST.server.devices)||[];
+  devRow.classList.toggle("hidden",!devs.length); $("#pushDevLabel").textContent=t("pushDevices");
+  const box=$("#pushDevs"); box.innerHTML="";
+  for(const d of devs){ const row=document.createElement("div"); row.className="rmb"; row.innerHTML='<span class="nm"></span><small></small>';
+    const mine=PUSHST.sub&&PUSHST.sub.endpoint.slice(-10)===d.endpointTail;
+    row.firstChild.textContent=d.name+(mine?" ("+t("pushThis")+")":""); row.lastChild.textContent=d.since?new Date(d.since*1000).toLocaleDateString(CFG.lang):"";
+    box.appendChild(row); } }
 
 /* ---------- remote access: banner, toast, settings ---------- */
 function trxHost(u){ try{ return new URL(u).hostname; }catch(e){ return u||""; } }
@@ -1807,7 +1953,7 @@ function renderRemote(){
 }
 
 /* ---------- home-screen icon: offline shell (only on https, e.g. GitHub Pages) ---------- */
-if("serviceWorker" in navigator && window.isSecureContext && location.protocol==="https:"){
+if("serviceWorker" in navigator && window.isSecureContext){
   navigator.serviceWorker.register("sw.js").catch(()=>{}); }
 
 document.documentElement.lang=CFG.lang;
