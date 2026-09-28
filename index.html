@@ -489,7 +489,7 @@
    every fetch("/api/...") then goes end-to-end encrypted over MQTT instead of HTTP.
    Opened from the ESP / bridge itself without such a link: plain local HTTP as before. */
 const TRX_LOCAL_URL="http://truma-x.local/";
-const APP_BUILD="8e4905a";   // filled in by publish-webapp.yml (short git commit)
+const APP_BUILD="589cc32";   // filled in by publish-webapp.yml (short git commit)
 var TRX=(function(){          // var: the module script below reads window.TRX
   const hasKey=s=>/(^|&)(k|v)=/.test(s||"");
   const localHost=h=>!h||h==="localhost"||h.endsWith(".local")||h.startsWith("[")||
@@ -748,7 +748,7 @@ const FOOT_T={
 for(const k in FOOT_T) Object.assign(T[k],FOOT_T[k]);
 
 const PUSH_T={
-  nl:{pushHead:"Pushmeldingen",pushLabel:"Meldingen op dit toestel",pushOn:"Aan: je krijgt een melding bij een storing of waarschuwing, als het gas bijna op is en als de verbinding met het paneel wegvalt.",
+  nl:{pushSendFail:"Versturen mislukt: {e}",pushNoServer:"truma-x antwoordt niet. Staat de bridge (of straks de ESP) aan en is die bijgewerkt? Probeer het daarna opnieuw.",pushHead:"Pushmeldingen",pushLabel:"Meldingen op dit toestel",pushOn:"Aan: je krijgt een melding bij een storing of waarschuwing, als het gas bijna op is en als de verbinding met het paneel wegvalt.",
     pushOff:"Uit.",pushDenied:"Meldingen zijn geblokkeerd. Sta ze toe in de instellingen van je telefoon of browser en probeer opnieuw.",
     pushNeedHome:"Zet de app eerst op je beginscherm (Delen → Zet op beginscherm) en open hem via het icoon. Op een iPhone is iOS 16.4 of nieuwer nodig.",
     pushNoSupport:"Deze browser ondersteunt geen pushmeldingen.",pushViaApp:"Pushmeldingen zet je aan in de app op je beginscherm, of hier op de pc via http://localhost.",
@@ -756,7 +756,7 @@ const PUSH_T={
     pushFail:"Aanzetten lukte niet: {e}",pushDevices:"Toestellen met meldingen",pushThis:"dit toestel",pushWorking:"Bezig…",
     pushNote:"Meldingen gaan versleuteld rechtstreeks van truma-x naar de pushdienst van Apple of Google. Er zit geen eigen server tussen.",
     evPushOn:"Pushmeldingen aangezet",evPushOff:"Pushmeldingen uitgezet"},
-  en:{pushHead:"Push notifications",pushLabel:"Notifications on this device",pushOn:"On: you get a notification for faults or warnings, when gas runs low and when the connection to the panel drops.",
+  en:{pushSendFail:"Sending failed: {e}",pushNoServer:"truma-x doesn't answer. Is the bridge (or later the ESP) running and up to date? Then try again.",pushHead:"Push notifications",pushLabel:"Notifications on this device",pushOn:"On: you get a notification for faults or warnings, when gas runs low and when the connection to the panel drops.",
     pushOff:"Off.",pushDenied:"Notifications are blocked. Allow them in your phone or browser settings and try again.",
     pushNeedHome:"First add the app to your home screen (Share → Add to Home Screen) and open it from the icon. iPhone needs iOS 16.4 or later.",
     pushNoSupport:"This browser doesn't support push notifications.",pushViaApp:"Switch notifications on in the home-screen app, or here on the PC via http://localhost.",
@@ -764,7 +764,7 @@ const PUSH_T={
     pushFail:"Couldn't switch on: {e}",pushDevices:"Devices with notifications",pushThis:"this device",pushWorking:"Working…",
     pushNote:"Notifications go encrypted straight from truma-x to Apple's or Google's push service. There is no server of our own in between.",
     evPushOn:"Push notifications switched on",evPushOff:"Push notifications switched off"},
-  de:{pushHead:"Push-Mitteilungen",pushLabel:"Mitteilungen auf diesem Gerät",pushOn:"An: Mitteilung bei Störung oder Warnung, wenn das Gas knapp wird und wenn die Verbindung zum Panel abbricht.",
+  de:{pushSendFail:"Senden fehlgeschlagen: {e}",pushNoServer:"truma-x antwortet nicht. Läuft die Bridge (bzw. später der ESP) in der aktuellen Version? Dann erneut versuchen.",pushHead:"Push-Mitteilungen",pushLabel:"Mitteilungen auf diesem Gerät",pushOn:"An: Mitteilung bei Störung oder Warnung, wenn das Gas knapp wird und wenn die Verbindung zum Panel abbricht.",
     pushOff:"Aus.",pushDenied:"Mitteilungen sind blockiert. Erlaube sie in den Einstellungen von Handy oder Browser und versuche es erneut.",
     pushNeedHome:"Lege die App zuerst auf den Home-Bildschirm (Teilen → Zum Home-Bildschirm) und öffne sie über das Symbol. iPhone braucht iOS 16.4 oder neuer.",
     pushNoSupport:"Dieser Browser unterstützt keine Push-Mitteilungen.",pushViaApp:"Mitteilungen schaltest du in der App auf dem Home-Bildschirm ein oder hier am PC über http://localhost.",
@@ -804,7 +804,7 @@ function renderTabs(){
   const avail=tabs.filter(([id])=>visible(id)); if(!avail.some(([id])=>id===SET_TAB)&&avail.length) SET_TAB=avail[0][0];
   const bar=$("#setTabs"); bar.innerHTML="";
   for(const [id,k] of avail){ const b=document.createElement("button"); b.setAttribute("role","tab"); b.textContent=t(k);
-    b.setAttribute("aria-selected",id===SET_TAB); b.onclick=()=>{ SET_TAB=id; try{localStorage.setItem("trumax_tab",id);}catch(e){} renderTabs(); window.scrollTo(0,0); };
+    b.setAttribute("aria-selected",id===SET_TAB); b.onclick=()=>{ SET_TAB=id; try{localStorage.setItem("trumax_tab",id);}catch(e){} renderTabs(); window.scrollTo(0,0); if(id==="notify") loadPush(); };
     bar.appendChild(b); }
   for(const x of secs) x.classList.toggle("tabhide", x.dataset.tab!==SET_TAB);
   layoutSettings();
@@ -1857,13 +1857,13 @@ function renderPush(){
   if(TRX&&TRX.view) why=t("pushView");
   else if(!pushSupported()) why=isIOS()&&!isStandalone()?t("pushNeedHome"):(!window.isSecureContext?t("pushViaApp"):t("pushNoSupport"));
   else if(isIOS()&&!isStandalone()) why=t("pushNeedHome");
-  else if(!PUSHST.server) why=t("pushNoSupport");
+  else if(!PUSHST.server) why=t("pushNoServer");
   else if(Notification.permission==="denied") why=t("pushDenied");
   tg.style.opacity=why?.4:1; tg.onclick=()=>{ if(why||PUSHST.busy) return; on?pushDisable():pushEnable(); };
   st.textContent=PUSHST.msg||why||(on?t("pushOn"):t("pushOff"));
   test.textContent=t("pushTest"); test.classList.toggle("hidden",!on||!!why);
   test.onclick=async()=>{ try{ const r=await fetch("/api/push/test",{method:"POST",headers:Object.assign({"Content-Type":"application/json"},authHeaders()),body:JSON.stringify({endpoint:PUSHST.sub.endpoint})});
-    const j=await r.json(); trxToast(j.sent?t("pushSent"):t("pushFail",{e:"0"})); }catch(e){ trxToast(t("pushFail",{e:e.message})); } };
+    const j=await r.json(); if(j.ok) trxToastOk(t("pushSent")); else trxToast(t("pushSendFail",{e:j.detail||"?"})); }catch(e){ trxToast(t("pushSendFail",{e:e.message})); } };
   const devs=(PUSHST.server&&PUSHST.server.devices)||[];
   devRow.classList.toggle("hidden",!devs.length); $("#pushDevLabel").textContent=t("pushDevices");
   const box=$("#pushDevs"); box.innerHTML="";
@@ -1890,8 +1890,9 @@ function trxRender(){
   bar.firstChild.textContent=txt; bar.lastChild.textContent=t("rmLocal");
 }
 let _toastT=null;
+function trxToastOk(msg){ trxToast(msg); const el=$("#trxToast"); if(el) el.style.background="#2bb673"; }
 function trxToast(msg){ let el=$("#trxToast"); if(!el){ el=document.createElement("div"); el.id="trxToast"; el.className="trxtoast"; document.body.appendChild(el); }
-  el.textContent=msg; el.style.display=""; clearTimeout(_toastT); _toastT=setTimeout(()=>{ el.style.display="none"; },4000); }
+  el.textContent=msg; el.style.display=""; el.style.background=""; clearTimeout(_toastT); _toastT=setTimeout(()=>{ el.style.display="none"; },4000); }
 if(TRX){ setInterval(trxRender,5000);
   for(const id of ["#netSec","#bleSec","#fwSec","#secSec"]){ const e=$(id); if(e) e.classList.add("hidden"); }
   const bn=$("#bleNameInput"); if(bn&&bn.closest(".card")) bn.closest(".card").classList.add("hidden"); }
@@ -1954,6 +1955,10 @@ function renderRemote(){
 }
 
 /* ---------- home-screen icon: offline shell (only on https, e.g. GitHub Pages) ---------- */
+// opening the app = the notifications have been seen: clear the icon badge and the list
+function clearBadge(){ try{ if(navigator.clearAppBadge) navigator.clearAppBadge();
+  if(navigator.serviceWorker) navigator.serviceWorker.getRegistration().then(r=>r&&r.getNotifications().then(ns=>ns.forEach(n=>n.close()))); }catch(e){} }
+clearBadge(); document.addEventListener("visibilitychange",()=>{ if(!document.hidden) clearBadge(); });
 if("serviceWorker" in navigator && window.isSecureContext){
   navigator.serviceWorker.register("sw.js").catch(()=>{}); }
 

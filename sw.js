@@ -3,7 +3,7 @@
 //   developer always sees the latest files). /api/* and MQTT never touch it.
 // - Web Push: shows the notifications truma-x sends (faults, gas low, panel lost, test).
 // The remote key stays in the URL fragment / localStorage; the worker never sees it.
-const CACHE = "truma-x-v4";
+const CACHE = "truma-x-v5";
 const DEV = ["localhost", "127.0.0.1"].includes(self.location.hostname);
 const SHELL = ["./", "index.html", "truma_remote.js", "truma_mqtt.js", "manifest.webmanifest",
                "icon.svg", "icon-192.png", "icon-512.png", "apple-touch-icon.png"];
@@ -35,10 +35,19 @@ self.addEventListener("push", (e) => {
   e.waitUntil(self.registration.showNotification(d.title || "truma-x", {
     body: d.body || "", tag: d.tag || "truma-x", renotify: true,
     icon: "icon-192.png", badge: "icon-192.png", data: { kind: d.kind || "" },
-  }));
+  }).then(updateBadge));
 });
+// red badge on the home-screen icon = notifications still waiting (iOS 16.4+, Android, desktop)
+async function updateBadge() {
+  try {
+    const n = (await self.registration.getNotifications()).length;
+    if (!self.navigator.setAppBadge) return;
+    if (n) await self.navigator.setAppBadge(n); else await self.navigator.clearAppBadge();
+  } catch (err) {}
+}
+self.addEventListener("notificationclose", () => updateBadge());
 self.addEventListener("notificationclick", (e) => {
-  e.notification.close();
+  e.notification.close(); updateBadge();
   e.waitUntil(self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((cs) => {
     for (const c of cs) if ("focus" in c) return c.focus();
     return self.clients.openWindow("./");
