@@ -23,6 +23,8 @@
   }
   *{box-sizing:border-box}
   html,body{margin:0}
+  html{touch-action:manipulation;-webkit-text-size-adjust:100%}
+  button,.toggle,.pill{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
   body{background:radial-gradient(120% 80% at 50% -10%,#16386a 0%,var(--bg) 60%) fixed,var(--bg);
     color:var(--fg);min-height:100dvh;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
     padding:max(14px,env(safe-area-inset-top)) 14px calc(28px + env(safe-area-inset-bottom))}
@@ -56,7 +58,8 @@
   .cur{color:var(--muted);font-size:.82rem;margin-top:2px}
   .stepper{display:flex;justify-content:center;gap:44px;margin:-6px 0 22px}
   .stepper button{width:52px;height:52px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--fg);font-size:1.5rem;line-height:1;cursor:pointer;display:grid;place-items:center}
-  .stepper button:active{background:var(--surface2)}
+  .stepper button{-webkit-user-select:none;user-select:none}
+  .stepper button:active{background:var(--surface2);transform:scale(.94)}
   .stepper button:disabled{opacity:.35;cursor:default}
 
   .modes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:22px}
@@ -759,6 +762,14 @@ const R=100,C=2*Math.PI*R,SWEEP=0.75;
 const $=s=>document.querySelector(s);
 const post=async(tn,pn,v)=>{ try{ const r=await fetch("/api/set",{method:"POST",headers:Object.assign({"Content-Type":"application/json"},authHeaders()),body:JSON.stringify({tn,pn,v})});
     if(TRX && !r.ok) trxToast(t(TRX.view?"rmViewOnly":"rmCmdFail")); }catch(e){ if(TRX) trxToast(t("rmCmdFail")); } soonRefresh(); };
+let _holdUntil=0; const _debounce={};
+function postSoon(tn,pn,v,ms){ const k=tn+"."+pn; clearTimeout(_debounce[k]); _holdUntil=Date.now()+(ms||700)+3000;
+  _debounce[k]=setTimeout(()=>{ delete _debounce[k]; post(tn,pn,v); },ms||700); }
+function holdRepeat(el,fn){ let t1=null,t2=null; const stop=()=>{ clearTimeout(t1); clearInterval(t2); t1=t2=null; };
+  el.addEventListener("pointerdown",e=>{ if(el.disabled) return; e.preventDefault(); fn(); t1=setTimeout(()=>{ t2=setInterval(fn,130); },450); });
+  for(const ev of ["pointerup","pointerleave","pointercancel","blur"]) el.addEventListener(ev,stop);
+  el.addEventListener("contextmenu",e=>e.preventDefault());
+  el.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); fn(); } }); }
 let _soon=null; function soonRefresh(){ clearTimeout(_soon); _soon=setTimeout(()=>{ if(editIdx<0) refresh(false); },600); }
 
 let _hadReal=false, _fails=0;
@@ -826,8 +837,10 @@ function renderClimate(){
   const m=ST.climate?ST.climate.value:0; applyAccent(m);
   $("#modeName").textContent=modeName(m);
   const on=m!==0; TGT=ST.tgt?ST.tgt.value:220;
-  const vi=on&&isVentMode(m)?ventInfo():null;
-  if(vi){   // fan speed, e.g. 3 / 10
+  const vent=on&&isVentMode(m), vi=vent?ventInfo():null;
+  if(vent&&!vi){   // ventilating but the fan level isn't known (yet): never show a temperature here
+    $("#unit").textContent=""; $("#tgt").textContent="--"; drawFrac(0);
+  } else if(vi){   // fan speed, e.g. 3 / 10
     $("#unit").textContent="/"+vi.max; $("#tgt").textContent=String(vi.v);
     drawFrac((vi.v-vi.min)/Math.max(1,vi.max-vi.min));
   } else {
@@ -858,8 +871,8 @@ function renderClimate(){
 function bump(d){
   const m=ST.climate?ST.climate.value:0, vi=m!==0&&isVentMode(m)?ventInfo():null;
   if(vi){ const v=Math.min(vi.max,Math.max(vi.min,vi.v+(d>0?1:-1))); ST.vent.value=v;
-    $("#tgt").textContent=String(v); drawFrac((v-vi.min)/Math.max(1,vi.max-vi.min)); post(ST.vent.topic,ST.vent.param,v); return; }
-  if(!ST.tgt)return; let v=Math.min(300,Math.max(160,(ST.tgt.value||220)+d)); ST.tgt.value=v;TGT=v; $("#tgt").textContent=fmtTemp(v,false); drawArc(v); post("RoomClimate","TgtTemp",v); }
+    $("#tgt").textContent=String(v); drawFrac((v-vi.min)/Math.max(1,vi.max-vi.min)); postSoon(ST.vent.topic,ST.vent.param,v); return; }
+  if(!ST.tgt)return; let v=Math.min(300,Math.max(160,(ST.tgt.value||220)+d)); ST.tgt.value=v;TGT=v; $("#tgt").textContent=fmtTemp(v,false); drawArc(v); postSoon("RoomClimate","TgtTemp",v); }
 
 function segFrom(seg,opts,curVal,onPick){ seg.innerHTML="";
   for(const o of opts){ const b=document.createElement("button"); b.textContent=o.name; b.setAttribute("aria-pressed",o.value===curVal);
@@ -1365,7 +1378,7 @@ function renderAllViews(){ renderMain(); renderSettings(); }
 $("#gear").onclick=()=>{ $("#main").classList.add("hidden"); $("#settings").classList.remove("hidden"); window.scrollTo(0,0); renderRemote(); };
 $("#back").onclick=()=>{ $("#settings").classList.add("hidden"); $("#main").classList.remove("hidden"); window.scrollTo(0,0); };
 $("#back2").onclick=()=>showPage("home");
-$("#minus").onclick=()=>bump(-5); $("#plus").onclick=()=>bump(5);
+holdRepeat($("#minus"),()=>bump(-5)); holdRepeat($("#plus"),()=>bump(5));
 $("#loginBtn").onclick=doLogin; $("#loginToken").addEventListener("keydown",e=>{if(e.key==="Enter")doLogin();});
 
 /* dial drag */
@@ -1379,11 +1392,12 @@ function dragTo(ev){ if(!ST||!ST.climate||ST.climate.value===0)return; const box
 (function(){ const d=$("#dial"); d.addEventListener("pointerdown",e=>{dragging=true;dragTo(e);e.preventDefault();}); window.addEventListener("pointermove",e=>{if(dragging)dragTo(e);}); window.addEventListener("pointerup",()=>{ if(!dragging) return; dragging=false;
     const m=ST.climate?ST.climate.value:0;
     if(m!==0&&isVentMode(m)&&ST.vent) post(ST.vent.topic,ST.vent.param,ST.vent.value);
-    else if(ST.tgt) post("RoomClimate","TgtTemp",ST.tgt.value); }); })();
+    else if(ST.tgt){ _holdUntil=Date.now()+3000; post("RoomClimate","TgtTemp",ST.tgt.value); } }); })();
 
 /* boot */
 let _lastState="", _lastSettings=0, _busy=false;
 async function refresh(full){
+  if(!full && Date.now()<_holdUntil) return;      // user is still adjusting: don't jump back
   if(_busy) return; _busy=true;
   try{
     if(full || Date.now()-_lastSettings>60000){ await loadSettings(); await loadUpdate(); await loadNetwork(); await loadBle(); await loadRemote(); _lastSettings=Date.now(); full=true; }
